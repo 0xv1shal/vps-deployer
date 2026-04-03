@@ -1,6 +1,6 @@
 {
   "name": "vps-deployer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A lightweight, self-hosted continuous deployment (CD) system with a built-in web UI — manages projects on your VPS, accepts GitHub webhooks for automatic deployments, and sends real-time email notifications on deployment events",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

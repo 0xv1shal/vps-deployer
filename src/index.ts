@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { closeDB, initalizeDB } from "./db/db.ts";
 import { setPort, setSessKey, setWorkDirPath } from "./helpers/arg.helper.ts";
 import { createProxyAndLogConfigs } from "./helpers/config_files.helper.ts";
