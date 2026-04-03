@@ -1,0 +1,80 @@
+{
+  "name": "vps-deployer",
+  "version": "1.0.0",
+  "description": "A lightweight, self-hosted continuous deployment (CD) system with a built-in web UI — manages projects on your VPS, accepts GitHub webhooks for automatic deployments, and sends real-time email notifications on deployment events",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "vps-deployer": "dist/index.js"
+  },
+  "type": "module",
+  "files": [
+    "dist",
+    "public",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "ts-node src/index.ts ",
+   "build": "tsc && find src/modules -type d -name views -exec sh -c 'dest=\"dist/modules/${1#src/modules/}\"; mkdir -p \"$dest\"; cp \"$1\"/* \"$dest/\"' _ {} \\;",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+  "self-hosted-cd",
+  "continuous-deployment",
+  "github-webhooks",
+  "auto-deploy",
+  "vps-deployment",
+  "deployment-automation",
+  "ci-cd",
+  "lightweight-cli",
+  "web-ui",
+  "dashboard",
+  "webhook-deployer",
+  "email-notifications",
+  "deployment-notifier",
+  "server-management"
+],
+  "author": "0xv1shal",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/0xv1shal/vps-deployer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/0xv1shal/vps-deployer/issues"
+  },
+  "homepage": "https://github.com/0xv1shal/vps-deployer#readme",
+  "engines": {
+    "node": ">=18"
+  },
+  "os": [
+    "linux"
+  ],
+  "dependencies": {
+    "bcrypt": "6.0.0",
+    "better-sqlite3": "12.8.0",
+    "commander": "14.0.3",
+    "dotenv": "17.3.1",
+    "express": "5.2.1",
+    "express-session": "1.19.0",
+    "helmet": "8.1.0",
+    "limitngin": "2.0.0",
+    "nodemailer": "8.0.4",
+    "pug": "3.0.4"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "6.0.0",
+    "@types/better-sqlite3": "7.6.13",
+    "@types/dotenv": "6.1.1",
+    "@types/express": "5.0.6",
+    "@types/express-session": "1.18.2",
+    "@types/nodemailer": "7.0.11",
+    "@types/pug": "2.0.10",
+    "nodemon": "3.1.14",
+    "ts-node": "10.9.2",
+    "typescript": "6.0.2"
+  }
+}

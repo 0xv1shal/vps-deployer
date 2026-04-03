@@ -1,0 +1,157 @@
+extends ../../dashboard/views/layout.pug
+
+block content
+  // hidden deploy id for JS
+  div#deploy-id(data-id=deployment.id)
+
+  // Page Header
+  .d-flex.justify-content-between.align-items-center.mb-4
+    div
+      h2.mb-1 Deployment Details
+      p.text-muted.mb-0 Monitor deployment progress and logs
+    div
+      a.btn.btn-outline-secondary(href="/deployments")
+        i.bi.bi-arrow-left.me-2
+        | Back to Deployments
+
+  .row
+    // LEFT PANEL
+    .col-md-4.mb-4
+      .card.border-0.shadow-sm.mb-4
+        .card-header.bg-white.border-bottom-0.pt-3
+          .d-flex.align-items-center
+            i.bi.bi-info-circle.text-primary.me-2(style="font-size: 1.25rem;")
+            h5.mb-0 Deployment Info
+        .card-body
+          .mb-3.pb-2.border-bottom
+            .d-flex.justify-content-between
+              small.text-muted Deployment ID
+              strong.text-dark #{deployment.id}
+          
+          .mb-3.pb-2.border-bottom
+            .d-flex.justify-content-between.align-items-center
+              small.text-muted Status
+              span#deploy-status
+                if deployment.status === "running"
+                  span.badge.bg-warning.text-dark.px-3.py-2
+                    i.bi.bi-play-fill.me-1
+                    | running
+                else if deployment.status === "success"
+                  span.badge.bg-success.px-3.py-2
+                    i.bi.bi-check-circle-fill.me-1
+                    | success
+                else
+                  span.badge.bg-danger.px-3.py-2
+                    i.bi.bi-x-circle-fill.me-1
+                    | failed
+          
+          .mb-3.pb-2.border-bottom
+            .d-flex.justify-content-between
+              small.text-muted Started
+              strong.text-dark #{deployment.started_at}
+          
+          .mb-3
+            .d-flex.justify-content-between
+              small.text-muted Finished
+              strong.text-dark#finished-at #{deployment.finished_at || "Running..."}
+
+      .card.border-0.shadow-sm
+        .card-header.bg-white.border-bottom-0.pt-3
+          .d-flex.align-items-center
+            i.bi.bi-folder.text-primary.me-2(style="font-size: 1.25rem;")
+            h5.mb-0 Project Info
+        .card-body
+          .mb-3.pb-2.border-bottom
+            .d-flex.justify-content-between
+              small.text-muted Project Name
+              strong.text-dark #{deployment.name}
+          
+          .mb-3.pb-2.border-bottom
+            .d-flex.flex-column
+              small.text-muted.mb-1 Repository
+              a.text-decoration-none(href=deployment.github_url, target="_blank")
+                i.bi.bi-github.me-1
+                | #{deployment.github_url}
+          
+          .mb-3
+            .d-flex.justify-content-between
+              small.text-muted Branch
+              strong.text-dark #{deployment.branch_name}
+
+    // RIGHT PANEL
+    .col-md-8
+      .card.border-0.shadow-sm
+        .card-header.bg-white.border-bottom-0.pt-3
+          .d-flex.align-items-center
+            i.bi.bi-terminal.text-primary.me-2(style="font-size: 1.25rem;")
+            h5.mb-0 Deployment Logs
+        .card-body
+          #logs
+            if logs.length === 0
+              .text-center.py-5
+                i.bi.bi-console.display-1.text-muted
+                p.text-muted.mt-3.mb-0 No logs yet
+                small.text-muted Waiting for deployment to start...
+            else
+              each log in logs
+                .card.mb-3.border-0.shadow-sm
+                  .card-header.bg-light.border-bottom-0
+                    .d-flex.justify-content-between.align-items-center
+                      strong
+                        i.bi.bi-terminal.me-2
+                        | #{log.cmd}
+                      if log.status === "running"
+                        span.badge.bg-warning.text-dark.px-3.py-2
+                          i.bi.bi-play-fill.me-1
+                          | running
+                      else if log.status === "success"
+                        span.badge.bg-success.px-3.py-2
+                          i.bi.bi-check-circle-fill.me-1
+                          | success
+                      else
+                        span.badge.bg-danger.px-3.py-2
+                          i.bi.bi-x-circle-fill.me-1
+                          | failed
+                  .card-body
+                    .mb-2
+                      small.text-muted
+                        i.bi.bi-clock.me-1
+                        | Started: #{log.started_at}
+                        br
+                        i.bi.bi-stopwatch.me-1.mt-1
+                        | Finished: #{log.finished_at || "Running..."}
+                    pre.bg-dark.text-success.p-3.mt-2(style="max-height:300px; overflow:auto; border-radius: 6px;")
+                      = log.log || ""
+
+  // Additional styles
+  style.
+    .card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08) !important;
+    }
+    
+    .badge {
+      font-weight: 500;
+      font-size: 0.75rem;
+    }
+    
+    pre {
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+    
+    .bg-dark {
+      background-color: #1a1f36 !important;
+    }
+    
+    .text-success {
+      color: #10b981 !important;
+    }
+
+  // external script (CSP-safe)
+  script(src="/js/deployment-details.js")

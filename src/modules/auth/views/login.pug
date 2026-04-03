@@ -1,0 +1,254 @@
+doctype html
+html
+  head
+    title Login - VPS Deployer
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1")
+    
+    // Bootstrap 5 CSS + Icons
+    link(href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css", rel="stylesheet")
+    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css")
+    link(rel="icon", type="image/svg+xml", href="/favicon.svg")
+    
+    style.
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
+        background: #f5f7fa;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      }
+      
+      .login-container {
+        min-height: 100vh;
+        background: #f5f7fa;
+      }
+      
+      .login-card {
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+        border: 1px solid #e9ecef;
+      }
+      
+      .form-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #1a1f36;
+        margin-bottom: 0.5rem;
+      }
+      
+      .form-control {
+        border: 1px solid #dde1e6;
+        border-radius: 6px;
+        padding: 0.625rem 0.875rem;
+        font-size: 0.9375rem;
+        transition: all 0.15s ease;
+      }
+      
+      .form-control:focus {
+        border-color: #0066ff;
+        box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+        outline: none;
+      }
+      
+      .input-group-text {
+        background: #ffffff;
+        border: 1px solid #dde1e6;
+        border-right: none;
+        color: #6c757d;
+        font-size: 0.9375rem;
+      }
+      
+      .input-group .form-control {
+        border-left: none;
+      }
+      
+      .input-group .form-control:focus {
+        border-left: none;
+      }
+      
+      .input-group:focus-within .input-group-text {
+        border-color: #0066ff;
+        border-right: none;
+      }
+      
+      .btn-login {
+        background: #0066ff;
+        border: none;
+        border-radius: 6px;
+        padding: 0.625rem 1rem;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        color: #ffffff;
+        transition: all 0.15s ease;
+      }
+      
+      .btn-login:hover {
+        background: #0052cc;
+      }
+      
+      .btn-login:active {
+        background: #0047b3;
+      }
+      
+      .btn-outline-secondary {
+        border: 1px solid #dde1e6;
+        border-left: none;
+        color: #6c757d;
+      }
+      
+      .btn-outline-secondary:hover {
+        background: #f8f9fa;
+        border-color: #dde1e6;
+        border-left: none;
+        color: #495057;
+      }
+      
+      .alert {
+        border-radius: 6px;
+        border: 1px solid;
+        font-size: 0.875rem;
+        padding: 0.75rem 1rem;
+      }
+      
+      .alert-danger {
+        background: #fff5f5;
+        border-color: #fcc5c5;
+        color: #c62828;
+      }
+      
+      .alert-success {
+        background: #f0f9f0;
+        border-color: #c5e6c5;
+        color: #2e7d32;
+      }
+      
+      .register-link {
+        color: #0066ff;
+        text-decoration: none;
+        font-weight: 500;
+      }
+      
+      .register-link:hover {
+        color: #0052cc;
+        text-decoration: underline;
+      }
+      
+      .divider {
+        border-top: 1px solid #e9ecef;
+        margin: 1.5rem 0 1rem;
+      }
+      
+      h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1a1f36;
+        margin-bottom: 0.5rem;
+      }
+      
+      .subtitle {
+        color: #6c757d;
+        font-size: 0.875rem;
+      }
+      
+      .icon-circle {
+        width: 48px;
+        height: 48px;
+        background: #f0f7ff;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+      }
+      
+      .icon-circle i {
+        font-size: 1.5rem;
+        color: #0066ff;
+      }
+
+  body
+    .login-container.d-flex.align-items-center.justify-content-center
+      .container
+        .row.justify-content-center
+          .col-md-6.col-lg-5
+            .login-card.p-4.p-md-5
+              
+              // Header
+              .text-center.mb-4
+                .icon-circle
+                  i.bi.bi-cloud
+                h3.mb-1 Sign in
+                p.subtitle Access your VPS Deployer dashboard
+              
+              // Flash Messages
+              if error
+                .alert.alert-danger.alert-dismissible.fade-show.d-flex.align-items-center.mb-4(role="alert")
+                  i.bi.bi-exclamation-triangle-fill.me-2(style="font-size: 0.875rem;")
+                  span.flex-grow-1 #{error}
+                  
+              
+              if success
+                .alert.alert-success.alert-dismissible.fade-show.d-flex.align-items-center.mb-4(role="alert")
+                  i.bi.bi-check-circle-fill.me-2(style="font-size: 0.875rem;")
+                  span.flex-grow-1 #{success}
+                  
+              
+              // Login Form
+              form(method="POST", action="#")
+                
+                // Username Field
+                .mb-3
+                  label.form-label(for="username") Username
+                  .input-group
+                    span.input-group-text
+                      i.bi.bi-person
+                    input.form-control(
+                      type="text",
+                      id="username",
+                      name="username",
+                      placeholder="Enter your username",
+                      required,
+                      autocomplete="username",
+                      autofocus
+                    )
+                
+                // Password Field
+                .mb-4
+                  label.form-label(for="password") Password
+                  .input-group
+                    span.input-group-text
+                      i.bi.bi-lock
+                    input.form-control(
+                      type="password",
+                      id="password",
+                      name="password",
+                      placeholder="Enter your password",
+                      required,
+                      autocomplete="current-password"
+                    )
+                    button.btn.btn-outline-secondary(type="button", id="togglePassword", style="border-left: none;")
+                      i.bi.bi-eye-slash
+                
+                // Submit Button
+                button.btn.btn-login.w-100(type="submit")
+                  i.bi.bi-box-arrow-in-right.me-2
+                  | Sign in
+              
+              // Divider
+              .divider
+              
+              // Footer
+              .text-center
+                p.text-muted.mb-0(style="font-size: 0.875rem;")
+                  | Don't have an account? 
+                  a.register-link(href="/register") Create account
+
+    // Scripts
+    script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js")
+    script(src="/js/login.js")
+      

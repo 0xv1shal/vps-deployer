@@ -1,0 +1,149 @@
+extends ./layout.pug
+
+block content
+  // Page Header
+  .d-flex.justify-content-between.align-items-center.mb-4
+    div
+      h2.mb-1 Dashboard
+      p.text-muted.mb-0 Welcome back to VPS Deployer
+    div
+      i.bi.bi-grid-3x3-gap-fill.text-muted(style="font-size: 1.5rem;")
+
+  // ===== STATS CARDS =====
+  .row.mb-4.g-3
+    .col-md-3
+      .card.border-0.shadow-sm.h-100
+        .card-body
+          .d-flex.justify-content-between.align-items-start
+            div
+              p.text-muted.mb-1.small.text-uppercase.fw-semibold Projects
+              h2.mb-0.fw-bold #{stats.projects}
+            .bg-light.rounded-circle.p-3
+              i.bi.bi-folder.text-primary(style="font-size: 1.25rem;")
+
+    .col-md-3
+      .card.border-0.shadow-sm.h-100
+        .card-body
+          .d-flex.justify-content-between.align-items-start
+            div
+              p.text-muted.mb-1.small.text-uppercase.fw-semibold Deployments
+              h2.mb-0.fw-bold #{stats.deployments}
+            .bg-light.rounded-circle.p-3
+              i.bi.bi-rocket-takeoff.text-primary(style="font-size: 1.25rem;")
+
+    .col-md-3
+      .card.border-0.shadow-sm.h-100
+        .card-body
+          .d-flex.justify-content-between.align-items-start
+            div
+              p.text-muted.mb-1.small.text-uppercase.fw-semibold Running
+              h2.mb-0.fw-bold.text-warning #{stats.running}
+            .bg-light.rounded-circle.p-3
+              i.bi.bi-play-circle.text-warning(style="font-size: 1.25rem;")
+
+    .col-md-3
+      .card.border-0.shadow-sm.h-100
+        .card-body
+          .d-flex.justify-content-between.align-items-start
+            div
+              p.text-muted.mb-1.small.text-uppercase.fw-semibold Failed
+              h2.mb-0.fw-bold.text-danger #{stats.failed}
+            .bg-light.rounded-circle.p-3
+              i.bi.bi-x-circle.text-danger(style="font-size: 1.25rem;")
+
+  // ===== QUICK ACTIONS =====
+  .card.border-0.shadow-sm.mb-4
+    .card-body
+      .d-flex.justify-content-between.align-items-center
+        div
+          h5.mb-1 Quick Actions
+          p.text-muted.mb-0.small Deploy, manage, and monitor your projects
+        div
+          a.btn.btn-primary.me-2(href="/projects")
+            i.bi.bi-folder-plus.me-2
+            | Manage Projects
+          a.btn.btn-outline-dark(href="/deployments")
+            i.bi.bi-clock-history.me-2
+            | View Deployments
+
+  // ===== RECENT DEPLOYMENTS =====
+  .card.border-0.shadow-sm
+    .card-header.bg-white.border-bottom-0.pt-3
+      .d-flex.justify-content-between.align-items-center
+        div
+          h5.mb-0 Recent Deployments
+          p.text-muted.small.mb-0 Latest deployment activity
+        if recentDeployments.length > 0
+          a.btn.btn-sm.btn-link.text-decoration-none(href="/deployments") View all →
+
+    .card-body
+      if recentDeployments.length === 0
+        .text-center.py-5
+          i.bi.bi-inbox.display-1.text-muted
+          p.text-muted.mt-3.mb-0 No deployments yet
+          a.btn.btn-sm.btn-primary.mt-3(href="/projects") Create your first project
+      else
+        .table-responsive
+          table.table.table-hover.align-middle.mb-0
+            thead.table-light
+              tr
+                th(style="font-weight: 600;") Project Name
+                th(style="font-weight: 600;") Status
+                th(style="font-weight: 600;") Started
+                th(style="font-weight: 600;") Action
+            tbody
+              each d in recentDeployments
+                tr
+                  td
+                    .d-flex.align-items-center
+                      i.bi.bi-folder-fill.text-primary.me-2
+                      span.fw-medium #{d.name}
+                  td
+                    if d.status === "running"
+                      span.badge.bg-warning.text-dark.px-3.py-2
+                        i.bi.bi-play-fill.me-1
+                        | running
+                    else if d.status === "success"
+                      span.badge.bg-success.px-3.py-2
+                        i.bi.bi-check-circle-fill.me-1
+                        | success
+                    else
+                      span.badge.bg-danger.px-3.py-2
+                        i.bi.bi-x-circle-fill.me-1
+                        | failed
+                  td
+                    .d-flex.align-items-center
+                      i.bi.bi-clock.text-muted.me-2
+                      small.text-muted #{d.started_at}
+                  td
+                    a.btn.btn-sm.btn-outline-primary(href=`/deployment/${d.id}`)
+                      i.bi.bi-eye.me-1
+                      | View
+
+  // Additional styles
+  style.
+    .card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08) !important;
+    }
+    
+    .table-hover tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .badge {
+      font-weight: 500;
+      font-size: 0.75rem;
+    }
+    
+    .btn-link {
+      color: #0066ff;
+    }
+    
+    .btn-link:hover {
+      color: #0052cc;
+    }

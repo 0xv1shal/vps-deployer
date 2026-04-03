@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "allowUnreachableCode": false, // raises compiler errors about unreachable code : https://www.typescriptlang.org/tsconfig/#Type_Checking_6248
+    "noImplicitReturns": true, // When enabled, TypeScript will check all code paths in a function to ensure they return a value. : https://www.typescriptlang.org/tsconfig/#noImplicitReturns
+    "module": "nodenext",
+    "target": "esnext",
+    "noUnusedLocals": true, // Report errors on unused local variables. : https://www.typescriptlang.org/tsconfig/#noUnusedLocals
+    "noUnusedParameters": true, // Report errors on unused parameters in functions. : https://www.typescriptlang.org/tsconfig/#noUnusedParameters
+    "strictNullChecks": true, // https://www.typescriptlang.org/tsconfig/#strictNullChecks
+    "strictPropertyInitialization": true, // When set to true, TypeScript will raise an error when a class property was declared but not set in the constructor. : https://www.typescriptlang.org/tsconfig/#strictPropertyInitialization
+    "noEmit": false,
+    "types": [],
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "strict": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true
+  },
+  "include": ["src/**/*.ts"]
+}

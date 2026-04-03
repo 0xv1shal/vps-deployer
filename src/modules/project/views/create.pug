@@ -1,0 +1,189 @@
+extends ../../dashboard/views/layout.pug
+
+block content
+  // Page Header
+  .d-flex.justify-content-between.align-items-center.mb-4
+    div
+      h2.mb-1 Create Project
+      p.text-muted.mb-0 Add a new project to deploy on your VPS
+    div
+      a.btn.btn-outline-secondary(href="/projects")
+        i.bi.bi-arrow-left.me-2
+        | Back to Projects
+
+  // Flash Messages
+  if error
+    .alert.alert-danger.alert-dismissible.fade-show.d-flex.align-items-center.mb-4(role="alert")
+      i.bi.bi-exclamation-triangle-fill.me-2
+      span.flex-grow-1 #{error}
+      
+
+  .row
+    .col-lg-8.mb-4
+      // Create Project Form
+      .card.border-0.shadow-sm
+        .card-header.bg-white.border-bottom-0.pt-3
+          .d-flex.align-items-center
+            i.bi.bi-folder-plus.text-primary.me-2(style="font-size: 1.25rem;")
+            h5.mb-0 Project Details
+        .card-body
+          form(method="POST", action="/projects/create")
+            // Project Name
+            .mb-3
+              label.form-label.fw-semibold(for="name")
+                i.bi.bi-tag.me-1
+                | Project Name
+              input.form-control(
+                type="text",
+                id="name",
+                name="name",
+                placeholder="my-awesome-app",
+                required,
+                autofocus
+              )
+              small.form-text.text-muted Choose a unique name for your project
+            
+            // GitHub URL
+            .mb-3
+              label.form-label.fw-semibold(for="github_url")
+                i.bi.bi-github.me-1
+                | GitHub URL
+              input.form-control(
+                type="text",
+                id="github_url",
+                name="github_url",
+                placeholder="https://github.com/username/repository.git",
+                required
+              )
+              small.form-text.text-muted Use the .git URL from your GitHub repository
+            
+            // Branch
+            .mb-3
+              label.form-label.fw-semibold(for="branch_name")
+                i.bi.bi-git-branch.me-1
+                | Branch
+              input.form-control(
+                type="text",
+                id="branch_name",
+                name="branch_name",
+                placeholder="main",
+                required
+              )
+              small.form-text.text-muted The branch to deploy from
+            
+            // Checkboxes
+            .mb-3
+              .form-check.mb-2
+                input.form-check-input(
+                  type="checkbox",
+                  name="receive_email_notf",
+                  id="receive_email_notf"
+                )
+                label.form-check-label.fw-semibold(for="receive_email_notf")
+                  i.bi.bi-envelope.me-1
+                  | Receive Email Notifications
+                small.form-text.text-muted.d-block.ms-4 Get updates about deployment status
+            
+              .form-check
+                input.form-check-input(
+                  type="checkbox",
+                  name="auto_deploy",
+                  id="auto_deploy"
+                )
+                label.form-check-label.fw-semibold(for="auto_deploy")
+                  i.bi.bi-rocket.me-1
+                  | Enable Auto Deploy
+                small.form-text.text-muted.d-block.ms-4 Automatically deploy on GitHub push
+            
+            hr.my-4
+            
+            // Form Actions
+            .d-flex.gap-2
+              button.btn.btn-primary(type="submit")
+                i.bi.bi-check-lg.me-2
+                | Create Project
+              a.btn.btn-outline-secondary(href="/projects")
+                | Cancel
+
+    .col-lg-4.mb-4
+      // Info Note Card
+      .card.border-0.shadow-sm
+        .card-header.bg-white.border-bottom-0.pt-3
+          .d-flex.align-items-center
+            i.bi.bi-info-circle.text-warning.me-2(style="font-size: 1.25rem;")
+            h5.mb-0 Important Setup
+        .card-body
+          .alert.alert-warning.p-3.mb-0
+            strong
+              i.bi.bi-exclamation-triangle-fill.me-1
+              | SSH Authentication Required
+            hr
+            p.small.mb-2 The repository will be cloned using:
+            code.git-url.text-small git clone git@github.com:username/repository.git
+            hr
+            strong Setup SSH on your VPS:
+            ol.small.mt-2.ps-3.mb-0
+              li.mb-2
+                | Generate SSH key:
+                br
+                code ssh-keygen -t ed25519 -C "your_email@example.com"
+              li.mb-2
+                | Show public key:
+                br
+                code cat ~/.ssh/id_ed25519.pub
+              li.mb-2
+                | Add to GitHub:
+                br
+                a.text-decoration-none(href="https://github.com/settings/keys", target="_blank")
+                  i.bi.bi-box-arrow-up-right.me-1
+                  | github.com/settings/keys
+              li.mb-2
+                | Test connection:
+                br
+                code ssh -T git@github.com
+
+  // Additional styles
+  style.
+    .card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08) !important;
+    }
+    
+    .form-control:focus {
+      border-color: #0066ff;
+      box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+    }
+    
+    .alert {
+      border-radius: 8px;
+      border: none;
+    }
+    
+    .alert-danger {
+      background: #fff5f5;
+      color: #c62828;
+      border-left: 4px solid #c62828;
+    }
+    
+    .alert-warning {
+      background: #fff9e6;
+      color: #856404;
+      border-left: 4px solid #ffc107;
+    }
+    
+    code {
+      background: #f8f9fa;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      color: #d63384;
+    }
+    
+    .git-url {
+      word-break: break-all;
+      display: inline-block;
+    }
