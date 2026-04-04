@@ -21,38 +21,48 @@ vps-deployer --version
 Create a directory where VPS Deployer will store its database, project files, and generated configs:
 
 ```bash
-sudo mkdir -p /opt/vps-deployer
+mkdir -p /opt/vps-deployer
 ```
 
-## Step 3: Generate Configs
+## Step 3: One-Time Setup
 
-Run VPS Deployer with root privileges to generate the systemd service file, database, and reference configs:
+Enable user-level systemd services so they persist after you log out:
 
 ```bash
-sudo vps-deployer -w /opt/vps-deployer -p 3000 -s my-secret-session-key
+loginctl enable-linger $USER
+```
+
+> This is the only command that may require sudo (depending on your distro). After this, everything else runs as your user.
+
+## Step 4: Configure
+
+Run VPS Deployer to generate the user-level systemd service file, database, and reference configs:
+
+```bash
+vps-deployer config -w /opt/vps-deployer -p 3000 -s my-secret-session-key
 ```
 
 This command will:
 
-- Initialize the SQLite database (`data.db`)
+- Initialize the SQLite database (`vps-deployer.db`)
 - Generate Caddy and Nginx reference configs
-- Create a systemd service file at `/etc/systemd/system/vps-deployer.service`
+- Create a user-level systemd service file at `~/.config/systemd/user/vps-deployer.service`
 - **Exit immediately** (the server does NOT start)
 
-> **Dev mode:** To run the server in the foreground without systemd (for local development), add the `--dev` flag:
+> **Dev mode:** To run the server in the foreground without systemd (for local development), use:
 >
 > ```bash
-> sudo vps-deployer -w /opt/vps-deployer -p 3000 -s my-secret-session-key --dev
+> vps-deployer dev -w /opt/vps-deployer -p 3000 -s my-secret-session-key
 > ```
 >
 > This starts the server directly in your terminal. Press `Ctrl+C` to stop.
 
-## Step 4: Start the Service
+## Step 5: Start the Service
 
-Enable and start the systemd service:
+Enable and start the user-level systemd service:
 
 ```bash
-sudo vps-deployer start
+vps-deployer start
 ```
 
 The terminal is freed immediately. The server is now running in the background.
@@ -60,16 +70,16 @@ The terminal is freed immediately. The server is now running in the background.
 Check the status:
 
 ```bash
-systemctl status vps-deployer
+systemctl --user status vps-deployer
 ```
 
 View live logs:
 
 ```bash
-journalctl -u vps-deployer -f
+journalctl --user -u vps-deployer -f
 ```
 
-## Step 5: Register an Account
+## Step 6: Register an Account
 
 Open your browser and navigate to:
 
@@ -79,7 +89,7 @@ http://<your-server-ip>:3000/register
 
 Create your admin account with a username, password, and email address.
 
-## Step 6: Configure Email Notifications (Optional)
+## Step 7: Configure Email Notifications (Optional)
 
 1. Navigate to **Settings** from the dashboard
 2. Enter your SMTP credentials:
@@ -92,7 +102,7 @@ Create your admin account with a username, password, and email address.
 
 See [Email Setup](./email-setup.md) for detailed SMTP configuration.
 
-## Step 7: Create a Project
+## Step 8: Create a Project
 
 1. Go to **Projects** → **Create Project**
 2. Fill in the project details:
@@ -103,7 +113,7 @@ See [Email Setup](./email-setup.md) for detailed SMTP configuration.
    - **Email Notifications**: Toggle on to receive emails for this project's deployments
 3. Click **Create**
 
-## Step 8: Add Build/Deploy Commands
+## Step 9: Add Build/Deploy Commands
 
 After creating the project, you'll be taken to the project details page. Add the commands that should run during deployment, in order:
 
@@ -118,15 +128,15 @@ Each command runs sequentially. If any command fails, the deployment stops and y
 
 > **Important:** Every command runs inside the project directory (`<working-dir>/<project-id>/`). If you need to run a command in a different directory, chain it with `cd`. For example, to list files in `/var/www`, use `cd /var/www && ls` — you cannot add two separate commands and expect them to run in different directories.
 
-## Step 9: Add Environment Variables (Optional)
+## Step 10: Add Environment Variables (Optional)
 
 On the project details page, add any environment variables your application needs. These are written to a `.env` file in the project directory.
 
-## Step 10: Configure the GitHub Webhook
+## Step 11: Configure the GitHub Webhook
 
 1. On the project details page, copy the **Webhook URL** and **Webhook Secret**
 2. Go to your GitHub repository → **Settings** → **Webhooks** → **Add webhook**
-3. Paste the URL into the **Payload URL** field
+3. Paste the URL into the **Payload URL** field (use `https://` if you have a reverse proxy)
 4. Set **Content type** to `application/json`
 5. Paste the webhook secret into the **Secret** field
 6. Select **Just the push event**
@@ -134,7 +144,7 @@ On the project details page, add any environment variables your application need
 
 See [Webhook Setup](./webhook-setup.md) for more details.
 
-## Step 11: Trigger Your First Deployment
+## Step 12: Trigger Your First Deployment
 
 Push a commit to your configured branch:
 
@@ -150,15 +160,9 @@ VPS Deployer will:
 2. Execute your commands in sequence
 3. Send you an email notification with the results
 
-> **Important:** VPS Deployer does **not** automatically pull your repository on webhook receipt. You must explicitly add a `git pull` (or `git clone`) command as the first step in your project's command list. For example:
->
-> ```
-> 1. git pull origin main
-> 2. npm install
-> 3. npm run build
-> ```
+> **Important:** VPS Deployer does **not** automatically pull your repository on webhook receipt. You must explicitly add a `git pull` (or `git clone`) command as the first step in your project's command list.
 
-## Step 12: Monitor Deployments
+## Step 13: Monitor Deployments
 
 - View all deployments from the **Dashboard** or **Deployments** page
 - Click on any deployment to see real-time logs, command output, and success/failure status
@@ -167,23 +171,23 @@ VPS Deployer will:
 
 ```bash
 # Start the service
-sudo vps-deployer start
+vps-deployer start
 
 # Check status
-systemctl status vps-deployer
+systemctl --user status vps-deployer
 
 # View logs
-journalctl -u vps-deployer -f
+journalctl --user -u vps-deployer -f
 
 # Stop the service
-sudo systemctl stop vps-deployer
+systemctl --user stop vps-deployer
 
 # Remove the service entirely
-sudo vps-deployer uninstall
+vps-deployer uninstall
 ```
 
 ## What's Next?
 
-- [CLI Reference](./cli-reference.md) — Learn about all available flags, subcommands, and options
+- [CLI Reference](./cli-reference.md) — Learn about all available commands, flags, and options
 - [Architecture](./architecture.md) — Understand how VPS Deployer works under the hood
 - [Database Schema](./schema.md) — Review the data model

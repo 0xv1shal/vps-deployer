@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 import { getDB } from "../db/db.ts";
+import { writeToLogFile } from "./logging.helper.ts";
+import { getBaseUrl } from "./arg.helper.ts";
 
 type EmailPayload = {
   project: any;
@@ -66,8 +68,8 @@ export const sendDeploymentEmail = async ({
       subject: `🚀 Deployment Triggered - ${project.name}`,
       html,
     });
-  } catch (err) {
-    console.error("Email failed:", err);
+  } catch (err:any) {
+    writeToLogFile(`Failed to send email after deployment : ${err.message}`,{source:"SYS",level:"WARN"})
   }
 };
 
@@ -152,7 +154,7 @@ export const sendDeploymentResultEmail = async (
 
     <p>
       View details: 
-      <a href="http://your-domain/deployment/${deployId}">
+      <a href="${getBaseUrl()}/deployment/${deployId}">
         Open Deployment
       </a>
     </p>
@@ -175,7 +177,7 @@ export const sendDeploymentResultEmail = async (
           : `❌ Deployment Failed - ${deployment.name}`,
       html,
     });
-  } catch (err) {
-    console.error("Deployment result email failed:", err);
+  } catch (err:any) {
+    writeToLogFile(`Failed to send email after deployment result : ${err.message}`,{source:"SYS",level:"WARN"})
   }
 };

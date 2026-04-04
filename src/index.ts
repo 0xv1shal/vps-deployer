@@ -67,10 +67,13 @@ async function shutdown(signal: string) {
   });
 
   // hard timeout fallback (no await here)
-  setTimeout(() => {
-    server?.closeAllConnections();
-    process.exit(1);
-  }, 2*60*1000);
+  setTimeout(
+    () => {
+      server?.closeAllConnections();
+      process.exit(1);
+    },
+    2 * 60 * 1000,
+  );
 }
 
 function startServer(port: number) {
@@ -103,7 +106,6 @@ function initFromEnv() {
     startServer(port);
   }
 }
-
 
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));

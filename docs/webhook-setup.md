@@ -37,6 +37,14 @@ The URL format is:
 http://<your-server-ip>:<port>/webhook/<project-id>
 ```
 
+If you're using a reverse proxy with HTTPS (e.g., Caddy), use:
+
+```
+https://deploy.yourdomain.com/webhook/<project-id>
+```
+
+> **Important:** Always use `https://` in your GitHub webhook URL if you have a reverse proxy. GitHub does not follow redirects, so `http://` will fail with a 302 error.
+
 The `<project-id>` is a UUID that uniquely identifies your project. The **webhook secret** is a 64-character hex string generated automatically when you create the project.
 
 ## Configuring GitHub Webhooks

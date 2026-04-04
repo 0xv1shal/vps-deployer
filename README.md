@@ -27,11 +27,12 @@
 | ⚙️ **Custom Build Commands** | Define per-project command sequences (build, migrate, restart) |
 | 🔐 **Per-Project Env Vars** | Manage `.env` files through the UI |
 | 🪶 **Lightweight** | Single SQLite database, no external services required |
-| 🚀 **CLI-Driven** | Start with a single command, manage everything from the web |
+| 🚀 **CLI-Driven** | Configure with one command, manage everything from the web |
+| 🔒 **No Root Required** | Runs entirely as a user-level systemd service |
 
 ## Prerequisites
 
-- **Linux** (requires `root`/`sudo` for systemd service creation)
+- **Linux** with systemd (user-level services)
 - **Node.js** >= 18
 - **npm** or **pnpm**
 
@@ -43,49 +44,54 @@
 npm install -g vps-deployer
 ```
 
-### 2. Generate Configs
+### 2. One-Time Setup
+
+Enable user-level systemd services to persist after logout:
 
 ```bash
-sudo vps-deployer -w /opt/vps-deployer -p 3000 -s your-super-secret-session-key
+loginctl enable-linger $USER
 ```
 
-This creates the systemd service file, database, and reference configs, then exits.
+### 3. Configure
+
+```bash
+vps-deployer config -w /opt/vps-deployer -p 3000 -s your-super-secret-session-key
+```
+
+This creates the user-level systemd service file, database, and reference configs, then exits.
 
 | Flag | Description |
 |------|-------------|
 | `-w, --working-dir` | Directory where projects and data will be stored |
 | `-p, --port` | Port for the web UI and API (1024–50000) |
 | `-s, --session-key` | Secret key for session encryption (min 6 characters) |
-| `--dev` | Run in development mode (foreground, no systemd) |
 
-### 3. Start the Service
+### 4. Start the Service
 
 ```bash
-sudo vps-deployer start
+vps-deployer start
 ```
 
 This enables and starts the systemd service. The terminal is freed immediately.
 
-> **Dev mode:** To run in the foreground without systemd, use `sudo vps-deployer -w /opt/vps-deployer -p 3000 -s key --dev`
-
-### 4. Open the Web UI
+### 5. Open the Web UI
 
 Navigate to `http://<your-server-ip>:3000` and register your account.
 
-### 5. Create a Project
+### 6. Create a Project
 
 1. Go to **Projects** → **Create**
 2. Enter your GitHub repo URL and branch name
 3. Add build/deploy commands (e.g., `npm install`, `npm run build`, `pm2 restart app`)
 4. Save — your unique webhook URL and secret will be displayed
 
-### 6. Configure the Webhook
+### 7. Configure the Webhook
 
 Copy the webhook URL and secret from the project details page, then add them to your GitHub repo:
 
 `Settings → Webhooks → Add webhook → Paste URL → Set Content type to application/json → Paste Secret`
 
-### 7. Deploy
+### 8. Deploy
 
 Push to your configured branch. VPS Deployer will receive the webhook, run your commands, and notify you via email.
 
@@ -96,6 +102,15 @@ Push to your configured branch. VPS Deployer will receive the webhook, run your 
 > 2. npm install
 > 3. npm run build
 > ```
+
+## CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `vps-deployer config -w <dir> -p <port> -s <key>` | Generate systemd service file, database, and configs |
+| `vps-deployer start` | Enable and start the user-level systemd service |
+| `vps-deployer dev -w <dir> -p <port> -s <key>` | Run in development mode (foreground, no systemd) |
+| `vps-deployer uninstall` | Stop, disable, and remove the systemd service |
 
 ## Screenshots
 
@@ -113,36 +128,59 @@ Push to your configured branch. VPS Deployer will receive the webhook, run your 
 
 ## Project Structure
 
-When you run VPS Deployer, it creates the following structure in your working directory:
+When you run `vps-deployer config`, it creates the following structure in your working directory:
 
 ```
 /opt/vps-deployer/
-├── data.db                    # SQLite database
+├── vps-deployer.db            # SQLite database
 ├── caddy.config               # Generated reverse proxy config
 ├── nginx.config               # Generated reverse proxy config
-├── systemd.file.copy.txt      # Systemd unit file reference
+├── vps-deployer.log           # Application log file
 └── <project-id>/              # Per-project workspace
     ├── .env                   # Environment variables
     └── ...                    # Cloned repository files
 ```
+
+The systemd service file is created at `~/.config/systemd/user/vps-deployer.service`.
 
 ## Documentation
 
 | Document | Description |
 |----------|-------------|
 | [Quick Start](https://github.com/0xv1shal/vps-deployer/blob/main/docs/quick-start.md) | Step-by-step walkthrough from install to first deployment |
-| [CLI Reference](https://github.com/0xv1shal/vps-deployer/blob/main/docs/cli-reference.md) | All flags, validation rules, and examples |
+| [CLI Reference](https://github.com/0xv1shal/vps-deployer/blob/main/docs/cli-reference.md) | All commands, flags, validation rules, and examples |
 | [Webhook Setup](https://github.com/0xv1shal/vps-deployer/blob/main/docs/webhook-setup.md) | Configure GitHub webhooks for auto-deployment |
 | [Email Setup](https://github.com/0xv1shal/vps-deployer/blob/main/docs/email-setup.md) | Configure SMTP for deployment notifications |
 | [Architecture](https://github.com/0xv1shal/vps-deployer/blob/main/docs/architecture.md) | System design, database schema, and deployment flow |
 | [Database Schema](https://github.com/0xv1shal/vps-deployer/blob/main/docs/schema.md) | Full table definitions |
+| [Privileged Commands](https://github.com/0xv1shal/vps-deployer/blob/main/docs/privileged-commands.md) | Configure sudoers for commands like pm2, docker, systemctl |
+
+## Managing the Service
+
+```bash
+# Start
+vps-deployer start
+
+# Status
+systemctl --user status vps-deployer
+
+# Logs
+journalctl --user -u vps-deployer -f
+
+# Stop
+systemctl --user stop vps-deployer
+
+# Remove entirely
+vps-deployer uninstall
+```
 
 ## Security
 
-- This tool **must be run as root** to create systemd services and execute deployment commands
+- Runs as a **user-level systemd service** — no root required
 - The web UI is protected by session-based authentication (login/register)
 - Rate limiting is applied on auth endpoints (40 req/min per IP)
 - Every webhook is verified using HMAC-SHA256 with a per-project secret
+- Dangerous commands (`rm -rf /`, `shutdown`, `reboot`, `mkfs`, fork bombs) are blocked
 - Use a strong, unique session key (`-s` flag)
 - Keep the working directory restricted to the tool only
 

@@ -11,6 +11,7 @@ import {
 } from "../helper/project_file_sys.helper.ts";
 import { writeToLogFile } from "../../../helpers/logging.helper.ts";
 import { normalizeRepoUrl } from "../../../helpers/common.helper.ts";
+import { getBaseUrl } from "../../../helpers/arg.helper.ts";
 
 // LIST PROJECTS
 export const listProjects = (_req: Request, res: Response) => {
@@ -165,6 +166,7 @@ export const viewProjectDetails = (req: Request, res: Response) => {
     project,
     commands,
     envs,
+    baseUrl:getBaseUrl(),
     active: "project",
   });
 };

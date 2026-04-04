@@ -1,6 +1,14 @@
 let DIR_PATH = ''
 let PORT = 0
 let SESS_KEY = ''
+let BASE_URL = '';
+
+export const setBaseUrl = (url: string) => { BASE_URL = url; };
+
+export const getBaseUrl = () => {
+  if (!BASE_URL) throw new Error('BASE_URL is not set');
+  return BASE_URL;
+};
 
 export const setWorkDirPath = (path:string)=>{
     DIR_PATH = path
