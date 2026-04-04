@@ -108,14 +108,15 @@ export const deleteProject = async (req: Request, res: Response) => {
 
   const db = getDB();
   try {
-    db.prepare("DELETE FROM project WHERE id = ?").run(id);
-
     if (typeof id !== "string") {
       return res.render("project/views/index", {
         error: "Id must be string",
         active: "project",
       });
     }
+
+    db.prepare("DELETE FROM project WHERE id = ?").run(id);
+    
     // best effort cleanup
     deleteProjDir(id).catch((err) => {
       writeToLogFile("FS cleanup failed", {
@@ -277,7 +278,7 @@ export const addCommand = (req: Request, res: Response) => {
   const db = getDB();
 
   const seq: any = db
-    .prepare("SELECT COUNT(*) as count FROM project_commands WHERE proj_id = ?")
+    .prepare("SELECT COALESCE(MAX(seq_no), 0) + 1 AS next_seq FROM project_commands WHERE proj_id = ?")
     .get(id);
 
   db.prepare(
@@ -285,7 +286,7 @@ export const addCommand = (req: Request, res: Response) => {
     INSERT INTO project_commands (id, proj_id, seq_no, cmd)
     VALUES (?, ?, ?, ?)
   `,
-  ).run(crypto.randomUUID(), id, seq.count + 1, cmd);
+  ).run(crypto.randomUUID(), id, seq.next_seq + 1, cmd);
 
   return res.redirect(`/projects/${id}`);
 };
@@ -316,7 +317,7 @@ export const updateProject = (req: Request, res: Response) => {
     if (receiveEmail === 1) {
       const emailConfig: any = db.prepare("SELECT * FROM email LIMIT 1").get();
 
-      if (!emailConfig) {
+       if (!emailConfig || !emailConfig.smtp || !emailConfig.smtp_port || !emailConfig.from) {
         return res.redirect(`/projects/${id}`);
       }
     }
@@ -342,7 +343,12 @@ export const updateProject = (req: Request, res: Response) => {
     );
 
     return res.redirect(`/projects/${id}`);
-  } catch (error) {
+  } catch (error:any) {
+     writeToLogFile("Project update failed", {
+      level: "ERROR",
+      source: "DB",
+      meta: { projectId: id, error: error.message },
+    });
     return res.redirect(`/projects/${id}`);
   }
 };

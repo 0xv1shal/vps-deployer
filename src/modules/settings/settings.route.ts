@@ -10,8 +10,8 @@ const router = Router();
 
 router.use(requireAuth);
 
-router.get("/settings", viewSettings);
-router.post("/settings/email", upsertEmail);
-router.post("/settings/email/test", sendTestEmail);
+router.get("/", viewSettings);
+router.post("/email", upsertEmail);
+router.post("/email/test", sendTestEmail);
 
 export default router;

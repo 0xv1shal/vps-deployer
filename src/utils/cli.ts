@@ -23,8 +23,8 @@ const checkArgsValidation = (path: string, port: number,sessionKey:string): void
 };
 
 
-const parseCommonOptions = (program: Command) => {
-  const opts = program.opts();
+const parseCommonOptions = (opts: { workingDir: string; port: string; sessionKey: string }) => {
+
   const workingDir = opts.workingDir.toString();
   const port = Number.parseInt(opts.port, 10);
   const sessionKey = opts.sessionKey.toString();
@@ -44,7 +44,7 @@ export const setupCLI = () => {
     .requiredOption("-s, --session-key <sessKey>", "sets the session key of the server")
     .action(async (opts) => {
       try {
-        const { workingDir, port, sessionKey } = parseCommonOptions(program);
+        const { workingDir, port, sessionKey } = parseCommonOptions(opts);
         
         setWorkDirPath(workingDir);
         setPort(port);
@@ -103,7 +103,7 @@ export const setupCLI = () => {
     .requiredOption("-p, --port <port>", "sets the port of the server")
     .requiredOption("-s, --session-key <sessKey>", "sets the session key of the server")
     .action(async (opts) => {
-      const { workingDir, port, sessionKey } = parseCommonOptions(program);
+      const { workingDir, port, sessionKey } = parseCommonOptions(opts);
       // Signal to index.ts to run in dev mode
       process.env.VPS_DEPLOYER_MODE = "dev";
       process.env.VPS_WORK_DIR = workingDir;
@@ -119,7 +119,7 @@ export const setupCLI = () => {
     .requiredOption("-s, --session-key <sessKey>", "")
     .addOption(new Option("--daemon", "").hideHelp())
     .action(async (opts) => {
-      const { workingDir, port, sessionKey } = parseCommonOptions(program);
+      const { workingDir, port, sessionKey } = parseCommonOptions(opts);
       // Signal to index.ts to run in daemon mode
       process.env.VPS_DEPLOYER_MODE = "daemon";
       process.env.VPS_WORK_DIR = workingDir;

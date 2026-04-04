@@ -12,6 +12,10 @@ export const githubWebhook = (req: Request, res: Response) => {
     return res.status(401).send("Missing signature");
   }
 
+  if (!req.body || typeof req.body !== "object") {
+  return res.status(400).send("Invalid request body");
+}
+
   const payload = JSON.stringify(req.body);
 
   const db = getDB();
@@ -34,6 +38,10 @@ export const githubWebhook = (req: Request, res: Response) => {
       .createHmac("sha256", project.webhook_secret)
       .update(payload)
       .digest("hex");
+
+  if (signature.length !== expected.length) {
+    return res.status(401).send("Invalid signature");
+  }
 
   if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
     return res.status(401).send("Invalid signature");

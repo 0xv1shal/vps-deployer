@@ -22,6 +22,19 @@ export const viewSettings = (_req: Request, res: Response) => {
 // UPSERT EMAIL CONFIG
 export const upsertEmail = (req: Request, res: Response) => {
   const { username, password, smtp, smtp_port, from } = req.body;
+
+  if (!smtp || !smtp_port || !from) {
+    const db = getDB();
+    const user = db.prepare("SELECT * FROM user LIMIT 1").get();
+    const emailData = db.prepare("SELECT * FROM email LIMIT 1").get();
+    return res.render("settings/views/index", {
+      user: user || {},
+      email: emailData || {},
+      convertDateToIST,
+      active: "settings",
+      error: "SMTP host, port, and from email are required",
+    });
+  }
   const db = getDB();
 
   try {

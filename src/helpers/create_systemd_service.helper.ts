@@ -1,4 +1,4 @@
-import { spawn } from "child_process";
+import { execSync, spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 import { getHomeDir } from "./get_home_dir.helper.ts";
@@ -14,6 +14,7 @@ type ServiceConfig = {
 const runSystemctl = (args: string[]): Promise<void> => {
   return new Promise((resolve, reject) => {
     const child = spawn("systemctl", ["--user", ...args], { stdio: "inherit" });
+    child.on("error", (err) => reject(new Error(`systemctl --user ${args.join(" ")} failed: ${err.message}`)));
     child.on("close", (code) => {
       if (code === 0) resolve();
       else reject(new Error(`systemctl --user ${args.join(" ")} exited with code ${code}`));
@@ -28,9 +29,12 @@ export const createSystemdService = async ({
   workingDir,
 }: ServiceConfig) => {
   const userDir = path.join(getHomeDir(), ".config", "systemd", "user");
+  
   const serviceFilePath = path.join(userDir, `${serviceName}.service`);
-
-  const execCmd = `${execPath} daemon ${args.join(" ")}`;
+  
+  const nodePath = execSync("which node").toString().trim();
+  const safeArgs = args.map((a) => `"${a}"`).join(" ");
+  const execCmd = `${nodePath} ${execPath} daemon ${safeArgs}`;
 
   const serviceContent = `[Unit]
 Description=VPS Deployer Service (${serviceName})

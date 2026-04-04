@@ -35,11 +35,16 @@ export const initSessionAndRoutes = (app: any) => {
   );
 
   app.use(dashboardRouter);
+
   app.use(authRouter);
-  app.use(projectRouter);
-  app.use(settingsRouter);
+
+  app.use("/projects",projectRouter);
+
+  app.use("/settings",settingsRouter);
+
   app.use(deployRouter);
-  app.use(webhookRouter);
+
+  app.use("/webhook",webhookRouter);
 
   app.use((_req: Request, res: Response) => {
     res.status(404).render("common/views/404");

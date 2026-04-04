@@ -3,6 +3,7 @@ import { login, register, viewLogin, viewRegister } from "./controllers/auth.con
 import limitNgin from 'limitngin'
 
 const router = Router()
+
 router.use(limitNgin({
     allowedNoOfRequests: 40,
     intervalInSec: 60,

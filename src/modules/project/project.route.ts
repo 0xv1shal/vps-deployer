@@ -14,20 +14,22 @@ import {
 import { requireAuth } from "../../middleware/auth.middleware.ts";
 
 const router = Router();
+
 router.use(requireAuth)
-router.get("/projects", listProjects);
-router.get("/projects/create", viewCreateProject);
-router.post("/projects/create", createProject);
 
-router.post("/projects/:id/delete", deleteProject);
+router.get("/", listProjects);
+router.get("/create", viewCreateProject);
+router.post("/create", createProject);
 
-router.get("/projects/:id", viewProjectDetails);
-router.post("/projects/:id/update", updateProject);
+router.post("/:id/delete", deleteProject);
 
-router.post("/projects/:id/env", addEnv);
-router.post("/projects/:id/env/:envId/delete", deleteEnv);
+router.get("/:id", viewProjectDetails);
+router.post("/:id/update", updateProject);
 
-router.post("/projects/:id/commands", addCommand);
-router.post("/projects/:id/commands/:cmdId/delete", deleteCommand);
+router.post("/:id/env", addEnv);
+router.post("/:id/env/:envId/delete", deleteEnv);
+
+router.post("/:id/commands", addCommand);
+router.post("/:id/commands/:cmdId/delete", deleteCommand);
 
 export default router;
