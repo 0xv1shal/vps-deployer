@@ -1,0 +1,74 @@
+---
+title: CLI Commands
+description: Complete reference of all VPS Deployer CLI commands and flags.
+---
+
+## Commands
+
+### `config`
+
+Generate the systemd service file, database, and reference configs.
+
+```bash
+vps-deployer config -w /opt/vps-deployer -p 3000 -s your-secret-key
+```
+
+| Flag | Type | Description | Validation |
+|---|---|---|---|
+| `-w, --working-dir` | string | Directory where projects and data will be stored | Must exist |
+| `-p, --port` | number | Port for the web UI and API | 1024–50000 |
+| `-s, --session-key` | string | Secret key for session encryption | Min 6 characters |
+
+This command exits immediately after setup. It does not start the server.
+
+### `start`
+
+Enable and start the user-level systemd service.
+
+```bash
+vps-deployer start
+```
+
+Reads configuration from the previously generated service file. No flags required.
+
+### `dev`
+
+Run in development mode (foreground, no systemd).
+
+```bash
+vps-deployer dev -w /opt/vps-deployer -p 3000 -s your-secret-key
+```
+
+Accepts the same flags as `config`. Useful for testing or running without systemd.
+
+### `daemon`
+
+Hidden command invoked by systemd `ExecStart`. Not meant for direct use.
+
+### `uninstall`
+
+Stop, disable, and remove the systemd service.
+
+```bash
+vps-deployer uninstall
+```
+
+This removes the service file but does **not** delete your database or working directory.
+
+## Validation Rules
+
+| Rule | Detail |
+|---|---|
+| Working directory | Must already exist on disk |
+| Port | Must be between 1024 and 50000 |
+| Session key | Must be at least 6 characters |
+| All flags required | `config` and `dev` require all three flags |
+
+## Troubleshooting
+
+| Error | Cause | Fix |
+|---|---|---|
+| `Directory does not exist` | `-w` path doesn't exist | `mkdir -p /opt/vps-deployer` |
+| `Port must be between 1024 and 50000` | Invalid port | Choose a port in range |
+| `Session key must be at least 6 characters` | `-s` too short | Use a longer key |
+| `Service file already exists` | Already configured | Run `uninstall` first or overwrite |

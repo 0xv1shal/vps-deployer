@@ -1,0 +1,65 @@
+---
+title: Working Directory
+description: Understanding the working directory structure and what gets created.
+---
+
+## What Is the Working Directory?
+
+The working directory (set via `-w` flag) is where VPS Deployer stores all its data: the SQLite database, log files, reference configs, and project workspaces.
+
+## Directory Structure
+
+After running `vps-deployer config`, your working directory looks like this:
+
+```
+/opt/vps-deployer/
+├── vps-deployer.db            # SQLite database (all state)
+├── caddy.config               # Generated reverse proxy reference config
+├── nginx.config               # Generated reverse proxy reference config
+├── vps-deployer.log           # Application log file
+└── <project-id>/              # Per-project workspace
+    ├── .env                   # Environment variables (from UI)
+    └── ...                    # Cloned repository files
+```
+
+## Per-Project Workspaces
+
+Each project gets its own subdirectory named after its UUID. This is where:
+
+- The repository is cloned or pulled
+- The `.env` file is stored (managed through the UI)
+- Build commands execute (this is the working directory for all commands)
+
+## Database
+
+The `vps-deployer.db` file is a SQLite database in WAL mode. It contains all state:
+
+- User accounts
+- Project configurations
+- Deployment history
+- Email settings
+- Command sequences
+- Environment variables
+
+## Log File
+
+The `vps-deployer.log` file captures all application events with:
+
+- Timestamp (IST timezone)
+- Log level (INFO, WARN, ERROR)
+- Source component (SERVER, SYSTEM, DEPLOY, etc.)
+- Optional metadata (error messages, deployment IDs)
+
+## Reference Configs
+
+The `caddy.config` and `nginx.config` files are **reference only**. They show you how to configure a reverse proxy but are not actively applied. Copy the relevant sections into your own proxy configuration.
+
+## Backup
+
+To back up your working directory:
+
+```bash
+tar -czf vps-deployer-backup.tar.gz /opt/vps-deployer/
+```
+
+This captures the database, configs, and all project workspaces in one archive.

@@ -1,0 +1,61 @@
+---
+title: Deployment Queue
+description: How the deployment queue works and its limitations.
+---
+
+## Overview
+
+VPS Deployer uses an **in-memory FIFO (first-in, first-out) queue** with a **single worker** to manage deployments. This means only one deployment runs at a time, and others wait in line.
+
+## How It Works
+
+```
+┌─────────────┐     ┌──────────────┐     ┌──────────────┐
+│  Webhook /  │────▶│    Queue     │────▶│   Worker     │
+│  Manual     │     │  (in-memory) │     │  (single)    │
+└─────────────┘     └──────────────┘     └──────────────┘
+```
+
+1. A deployment request arrives (webhook or manual button)
+2. It's added to the in-memory queue
+3. If the worker is idle, it picks up the deployment immediately
+4. If the worker is busy, the deployment waits in line
+5. When the worker finishes, it picks the next deployment
+
+## Why Single Worker?
+
+Deployments run commands that may restart services, modify files, or change system state. Running multiple deployments concurrently could cause:
+
+- File conflicts (two deployments modifying the same directory)
+- Service restart collisions
+- Resource contention (CPU, memory, disk I/O)
+
+The single-worker design eliminates these issues entirely.
+
+## Limitations
+
+### Queue Is Lost on Restart
+
+Since the queue is in-memory, **any queued deployments are lost** if the VPS Deployer process restarts. Only the currently running deployment is interrupted.
+
+This means:
+- If you push 5 times while a deployment is running, all 5 queue up
+- If the service crashes or restarts, those 5 queued deployments are gone
+- The next push after restart creates a fresh deployment
+
+### No Priority
+
+All deployments are treated equally. First-come, first-served.
+
+### No Cancellation
+
+Once a deployment is queued, it cannot be cancelled. It will run when the worker reaches it.
+
+## Monitoring Queue Status
+
+The dashboard shows:
+- Currently running deployment
+- Recent deployment history
+- Deployment status (running, success, failed)
+
+The queue itself is not directly visible in the UI, but you can infer its state from the number of pending deployments.

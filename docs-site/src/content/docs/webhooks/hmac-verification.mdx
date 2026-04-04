@@ -1,0 +1,56 @@
+---
+title: HMAC Verification
+description: How VPS Deployer verifies webhook authenticity.
+---
+
+## Overview
+
+Every incoming webhook is verified using **HMAC-SHA256** to ensure it came from GitHub and hasn't been tampered with.
+
+## How It Works
+
+### 1. GitHub Signs the Payload
+
+When GitHub sends a webhook, it includes an `X-Hub-Signature-256` header:
+
+```
+X-Hub-Signature-256: sha256=<hex-digest>
+```
+
+This is computed as:
+
+```
+HMAC-SHA256(raw-request-body, webhook-secret)
+```
+
+### 2. VPS Deployer Verifies the Signature
+
+On receiving a webhook:
+
+1. Extract the signature from the `X-Hub-Signature-256` header
+2. Compute the expected signature using the project's `webhook_secret`
+3. Compare using `crypto.timingSafeEqual` (prevents timing attacks)
+4. Include a buffer length check before comparison (prevents crashes on mismatched lengths)
+
+### 3. Reject Invalid Requests
+
+If the signature doesn't match:
+- The request is rejected with a `401` response
+- No deployment is triggered
+- The event is logged
+
+## Why This Matters
+
+Without HMAC verification, anyone who knows your webhook URL could:
+- Trigger unauthorized deployments
+- Flood your server with fake push events
+- Potentially execute commands on your VPS
+
+The per-project secret ensures that even if one project's secret is compromised, other projects remain secure.
+
+## Best Practices
+
+- **Use a strong secret** — the generated secret is a UUID, which is cryptographically random
+- **Never share the secret** — treat it like a password
+- **Rotate if compromised** — delete and recreate the project to get a new secret
+- **Use HTTPS** — in production, always expose your webhook endpoint over HTTPS to prevent man-in-the-middle attacks

@@ -1,0 +1,49 @@
+---
+title: API Overview
+description: Overview of the JSON API endpoints exposed by VPS Deployer.
+---
+
+## Overview
+
+VPS Deployer exposes both HTML views (for the web UI) and JSON API endpoints. The JSON endpoints are used by the frontend JavaScript but can also be consumed by external tools, CI pipelines, or custom integrations.
+
+## Authentication
+
+Most API endpoints require an active session. Authenticate by logging in through the web UI first, then use the session cookie in subsequent requests.
+
+The webhook endpoint (`POST /webhook/:projectId`) is the only API endpoint that does not require authentication — it uses HMAC-SHA256 verification instead.
+
+## Response Format
+
+JSON responses follow a consistent format:
+
+```json
+{
+  "success": true,
+  "data": { ... }
+}
+```
+
+Error responses:
+
+```json
+{
+  "success": false,
+  "error": "Error message"
+}
+```
+
+## Available Endpoints
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| `POST` | `/deploy` | Yes | Trigger a manual deployment |
+| `GET` | `/deploy/:id` | Yes | Get deployment details (JSON) |
+| `POST` | `/webhook/:projectId` | No | Receive GitHub webhook |
+| `POST` | `/email/test` | Yes | Send a test email |
+
+See [Endpoints](/api-reference/endpoints/) for detailed request/response schemas.
+
+## Rate Limiting
+
+Auth endpoints (`/login`, `/register`) are rate-limited to 40 requests per minute per IP. Other endpoints are not rate-limited.

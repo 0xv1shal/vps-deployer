@@ -1,0 +1,45 @@
+---
+title: Manual Deploys
+description: Trigger deployments directly from the web UI.
+---
+
+## Overview
+
+Manual deployments let you trigger a deployment without waiting for a GitHub webhook. This is useful for:
+
+- Re-deploying after fixing a server-side issue
+- Testing your build commands
+- Deploying when webhooks aren't configured
+
+## How to Deploy Manually
+
+1. Navigate to your project's details page
+2. Click the **Deploy** button
+3. The deployment starts immediately
+
+## What Happens
+
+When you click deploy:
+
+1. A new deployment record is created with status `running`
+2. Commands execute sequentially in the project workspace
+3. Each command's output is logged
+4. Email notification is sent (if enabled)
+5. Status updates to `success` or `failed`
+
+## Manual vs Webhook
+
+| | Manual Deploy | Webhook Deploy |
+|---|---|---|
+| **Trigger** | Button click in UI | GitHub push event |
+| **Authentication** | Session-based | HMAC-SHA256 signature |
+| **Auto Deploy** | Always runs | Only if enabled on project |
+| **Use Case** | Re-deploy, test | Continuous deployment |
+
+## Monitoring
+
+After triggering a deploy, you're redirected to the deployment details page where you can watch:
+
+- Real-time log output (polls every 3 seconds)
+- Command-by-command status
+- Total deployment duration

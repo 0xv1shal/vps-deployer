@@ -1,0 +1,75 @@
+---
+title: GitHub Setup
+description: Configure GitHub webhooks for automatic deployments.
+---
+
+## Overview
+
+GitHub webhooks allow VPS Deployer to automatically trigger deployments when you push to your configured branch.
+
+## Step-by-Step Setup
+
+### 1. Get Your Webhook URL and Secret
+
+1. Open your project in VPS Deployer
+2. On the project details page, find the **Webhook** section
+3. Copy the **Webhook URL** and **Webhook Secret**
+
+### 2. Configure GitHub
+
+1. Go to your GitHub repository
+2. Navigate to **Settings → Webhooks → Add webhook**
+3. Fill in the form:
+
+| Setting | Value |
+|---|---|
+| **Payload URL** | Your webhook URL (e.g., `http://your-vps:3000/webhook/<project-id>`) |
+| **Content type** | `application/json` |
+| **Secret** | The webhook secret from VPS Deployer |
+| **Which events?** | `Just the push event` |
+
+4. Click **Add webhook**
+
+### 3. Test the Webhook
+
+Push to your configured branch:
+
+```bash
+git push origin main
+```
+
+You should see:
+- A green checkmark on the GitHub webhook (last delivery was successful)
+- A new deployment appear in VPS Deployer
+
+## Auto Deploy vs Manual
+
+| Setting | Behavior |
+|---|---|
+| **Auto Deploy: ON** | Webhook triggers deployment immediately |
+| **Auto Deploy: OFF** | Webhook is received but deployment must be triggered manually |
+
+You can toggle this on the project details page at any time.
+
+## Webhook Payload
+
+GitHub sends a JSON payload on every push. VPS Deployer extracts:
+
+- `ref` — the branch that was pushed to
+- `head_commit` — commit SHA, message, author, and timestamp
+- `repository` — repo name and URL
+
+Only pushes to your configured branch trigger a deployment. Other branches are silently ignored.
+
+## Security
+
+Every webhook is verified using **HMAC-SHA256** with your per-project secret. See [HMAC Verification](/webhooks/hmac-verification/) for details.
+
+## Troubleshooting
+
+| Issue | Solution |
+|---|---|
+| 404 on webhook URL | Check the project ID in the URL matches your project |
+| 401 Unauthorized | Verify the webhook secret matches exactly |
+| Webhook not firing | Check GitHub's webhook delivery logs for errors |
+| Wrong branch deploying | Verify the branch name matches in both GitHub and VPS Deployer |

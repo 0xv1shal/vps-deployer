@@ -1,0 +1,403 @@
+---
+import '../styles/landing.css';
+import dashboard from  '../assets/screenshots/dashboard.png'
+import deploymentLogs from '../assets/screenshots/deployment-logs.png'
+import projectDetails from '../assets/screenshots/project-details.png'
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VPS Deployer — Self-hosted CI/CD that actually works. Deploy to your VPS with a single git push.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <title>VPS Deployer — Deploy to your VPS with a single push</title>
+</head>
+<body>
+    <div class="bg">
+        <div class="bg-grid"></div>
+        <div class="bg-glow glow-1"></div>
+        <div class="bg-glow glow-2"></div>
+    </div>
+
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="/" class="logo">
+                <img src="/favicon.svg" alt="" width="28" height="28">
+                <span>VPS Deployer</span>
+            </a>
+            <div class="nav-links">
+                <a href="/getting-started/overview">Docs</a>
+                <a href="/api-reference/overview">API</a>
+                <a href="https://github.com/0xv1shal/vps-deployer" target="_blank" rel="noopener" class="gh-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    GitHub
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-left">
+                <div class="badge">
+                    <span class="dot"></span>
+                    <span>Web UI • < 50MB RAM • No Root Required </span>
+                </div>
+                
+                <h1>
+                <span class="hero-line">Deploy to your</span>
+                <p>
+                    <span class="hero-vps">VPS</span>
+                <span class="hero-line">like a</span>
+                <span class="hero-boss">boss</span>
+                </p>
+            </h1>
+                
+            <p class="sub">Self-hosted CI/CD without the YAML hell. Push to GitHub, watch your code go live. No Kubernetes, no cloud lock-in, no credit card.</p>
+                
+                <div class="install">
+                    <span class="prompt">$</span>
+                    <code>npm install -g vps-deployer</code>
+                    <button class="copy" onclick="copyIt(this)">
+                        <svg class="ic-copy" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        <svg class="ic-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    </button>
+                </div>
+
+                <div class="cta-row">
+                    <a href="/getting-started/overview" class="btn-primary">Get Started</a>
+                    <a href="/getting-started/first-deployment" class="btn-ghost">View Demo</a>
+                </div>
+            </div>
+
+            <div class="hero-right">
+                <!-- Deployment Flow Animation -->
+                <div class="deploy-flow">
+                    <div class="flow-step active" id="step-github">
+                        <div class="flow-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                        </div>
+                        <span class="flow-label">GitHub</span>
+                        <span class="flow-status">Code pushed</span>
+                    </div>
+                    
+                    <div class="flow-arrow">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+                    
+                    <div class="flow-step" id="step-vd">
+                        <div class="flow-icon">
+                            <img src="/favicon.svg" alt="" width="28" height="28">
+                        </div>
+                        <span class="flow-label">VPS Deployer</span>
+                        <span class="flow-status">Deploying...</span>
+                    </div>
+                    
+                    <div class="flow-arrow">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+                    
+                    <div class="flow-step" id="step-email">
+                        <div class="flow-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        </div>
+                        <span class="flow-label">Email</span>
+                        <span class="flow-status">Notify sent</span>
+                    </div>
+                </div>
+
+                <!-- Mini Terminal -->
+                <div class="mini-term">
+                    <div class="term-bar">
+                        <span class="term-dots"><span></span><span></span><span></span></span>
+                        <span class="term-name">deployment.log</span>
+                        <span class="term-live"><span class="live-dot"></span>live</span>
+                    </div>
+                    <div class="term-body">
+                        <div class="t-line t-i">→ Webhook received</div>
+                        <div class="t-line t-c">$ git pull origin main</div>
+                        <div class="t-line t-o">✓ Ready</div>
+                        <div class="t-line t-c">$ npm run build</div>
+                        <div class="t-line t-o">✓ Built in 8.4s</div>
+                        <div class="t-line t-s">✓ Deployed — v2.4.1</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Bar -->
+        <section class="stats">
+            <div class="stat-item">
+                <span class="stat-val">~50MB</span>
+                <span class="stat-key">Memory</span>
+            </div>
+            <div class="stat-sep"></div>
+            <div class="stat-item">
+                <span class="stat-val">5 min</span>
+                <span class="stat-key">Setup</span>
+            </div>
+            <div class="stat-sep"></div>
+            <div class="stat-item">
+                <span class="stat-val">0</span>
+                <span class="stat-key">Dependencies</span>
+            </div>
+            <div class="stat-sep"></div>
+            <div class="stat-item">
+                <span class="stat-val">100%</span>
+                <span class="stat-key">Your Data</span>
+            </div>
+        </section>
+
+        <!-- Why Section -->
+        <section class="why">
+            <div class="section-tag">
+                <span class="tag-dot"></span>
+                Why VPS Deployer
+            </div>
+            <h2 class="section-title">Stop over-engineering your deployments</h2>
+            <p class="section-sub">
+                You have one server. One app. Just deploy when you push. <br class="br-desktop">
+                <strong>Why is this so hard?</strong>
+            </p>
+            
+            <div class="pain-points">
+                <div class="pain-item">
+                    <span class="pain-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                    </span>
+                    <div>
+                        <strong>Kubernetes?</strong> You have 1 VPS, not a cloud-native microservices cluster. You don't need pods, ingress, helm charts, or a PhD in YAML.
+                    </div>
+                </div>
+                <div class="pain-item">
+                    <span class="pain-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                    </span>
+                    <div>
+                        <strong>GitHub Actions?</strong> Great, but now your CI/CD is on someone else's servers. Minutes limit, storage limit, workflow syntax that makes no sense.
+                    </div>
+                </div>
+                <div class="pain-item">
+                    <span class="pain-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                    </span>
+                    <div>
+                        <strong>Jenkins?</strong> Because setting up Java, plugins, nodes, and configuration that drifts every 3 months sounds like a fun weekend project.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="solution-callout">
+                <span class="solution-arrow">→</span>
+                <span>You just need to push code and have it go live. <strong>That's exactly what VPS Deployer does.</strong></span>
+            </div>
+
+            <div class="why-grid">
+                <div class="why-card why-large">
+                    <div class="why-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                    </div>
+                    <h3>GitHub Push → Live</h3>
+                    <p>Every push to your branch triggers your deployment pipeline. No manual intervention. No clicking buttons. Just code and ship.</p>
+                    <div class="why-code">git push origin main → deployed</div>
+                </div>
+
+                <div class="why-card">
+                    <div class="why-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    </div>
+                    <h3>Web Dashboard</h3>
+                    <p>Real-time logs, project management, deployment history — all in a clean interface that actually works.</p>
+                </div>
+
+                <div class="why-card">
+                    <div class="why-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    </div>
+                    <h3>Email Alerts</h3>
+                    <p>Know instantly when deployments succeed or fail. Gmail, SendGrid, SES — any SMTP works.</p>
+                </div>
+
+                <div class="why-card">
+                    <div class="why-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <h3>Security Built-in</h3>
+                    <p>HMAC-SHA256 webhook verification, rate limiting, dangerous command blocking. Security first.</p>
+                </div>
+
+                <div class="why-card">
+                    <div class="why-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <h3>Runs Forever</h3>
+                    <p>User-level systemd service. Auto-restarts on crash, survives reboots, no sudo needed.</p>
+                </div>
+
+                <div class="why-card">
+                    <div class="why-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                    </div>
+                    <h3>SQLite Storage</h3>
+                    <p>Zero dependencies. Your entire deployment history in a single file. That's it.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Compare -->
+        <section class="compare">
+            <div class="section-tag">
+                <span class="tag-dot"></span>
+                Comparison
+            </div>
+            <h2 class="section-title">Why not the others?</h2>
+
+            <div class="compare-grid">
+                <div class="compare-col compare-main">
+                    <div class="compare-head">
+                        <img src="/favicon.svg" alt="" width="18" height="18">
+                        <span>VPS Deployer</span>
+                    </div>
+                    <div class="compare-row">Self-hosted</div>
+                    <div class="compare-row">No lock-in</div>
+                    <div class="compare-row">Quick setup</div>
+                    <div class="compare-row">Web UI</div>
+                    <div class="compare-row">~50MB RAM</div>
+                </div>
+                <div class="compare-col">
+                    <div class="compare-head">GitHub Actions</div>
+                    <div class="compare-row no">✗</div>
+                    <div class="compare-row no">✗</div>
+                    <div class="compare-row maybe">~</div>
+                    <div class="compare-row maybe">~</div>
+                    <div class="compare-row no">✗</div>
+                </div>
+                <div class="compare-col">
+                    <div class="compare-head">Jenkins</div>
+                    <div class="compare-row yes">✓</div>
+                    <div class="compare-row yes">✓</div>
+                    <div class="compare-row no">✗</div>
+                    <div class="compare-row yes">✓</div>
+                    <div class="compare-row no">✗</div>
+                </div>
+                <div class="compare-col">
+                    <div class="compare-head">Docker/K8s</div>
+                    <div class="compare-row yes">✓</div>
+                    <div class="compare-row yes">✓</div>
+                    <div class="compare-row no">✗</div>
+                    <div class="compare-row no">✗</div>
+                    <div class="compare-row no">✗</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta-section">
+            <div class="cta-left">
+                <div class="section-tag">
+                    <span class="tag-dot"></span>
+                    Get Started
+                </div>
+                <h2 class="cta-title">Ship code.<br>Not infrastructure.</h2>
+                <p class="cta-sub">Get started in 5 minutes. No credit card, no cloud, no YAML.</p>
+                <div class="install">
+                    <span class="prompt">$</span>
+                    <code>npm install -g vps-deployer</code>
+                    <button class="copy" onclick="copyIt(this)">
+                        <svg class="ic-copy" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        <svg class="ic-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    </button>
+                </div>
+                <a href="/getting-started/overview" class="btn-primary btn-lg">Read the Docs</a>
+            </div>
+            <div class="cta-right">
+                <div class="screenshots-bento">
+                    <a href={dashboard.src} target="_blank" rel="noopener" class="screenshot-card screenshot-main">
+                        <img src={dashboard.src} alt="Dashboard">
+                        <span class="screenshot-label">Dashboard</span>
+                    </a>
+                    <a href={projectDetails.src} target="_blank" rel="noopener" class="screenshot-card">
+                        <img src={projectDetails.src} alt="Project Details">
+                        <span class="screenshot-label">Projects</span>
+                    </a>
+                    <a href={deploymentLogs.src} target="_blank" rel="noopener" class="screenshot-card">
+                        <img src={deploymentLogs.src} alt="Deployment Logs">
+                        <span class="screenshot-label">Logs</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <img src="/favicon.svg" alt="" width="20" height="20">
+                <span>VPS Deployer</span>
+            </div>
+            <div class="footer-links">
+                <a href="/getting-started/overview">Docs</a>
+                <a href="/api-reference/overview">API</a>
+                <a href="https://github.com" target="_blank">GitHub</a>
+            </div>
+            <span class="footer-copy">MIT License</span>
+        </div>
+    </footer>
+
+    <script>
+        function copyIt(btn:any) {
+            navigator.clipboard.writeText('npm install -g vps-deployer');
+            const copy = btn.querySelector('.ic-copy') as HTMLElement;
+            const check = btn.querySelector('.ic-check') as HTMLElement;
+            copy.style.display = 'none';
+            check.style.display = 'block';
+            btn.classList.add('done');
+            setTimeout(() => {
+                copy.style.display = 'block';
+                check.style.display = 'none';
+                btn.classList.remove('done');
+            }, 2000);
+        }
+
+        // Deployment flow animation
+        const steps = ['step-github', 'step-vd', 'step-email'];
+        let currentStep = 0;
+
+        function animateFlow() {
+            steps.forEach((id, i) => {
+                const el = document.getElementById(id);
+                if (i < currentStep) {
+                    el?.classList.add('done');
+                    el?.classList.remove('active');
+                } else if (i === currentStep) {
+                    el?.classList.add('active');
+                    el?.classList.remove('done');
+                } else {
+                    el?.classList.remove('active', 'done');
+                }
+            });
+            currentStep = (currentStep + 1) % (steps.length + 1);
+        }
+
+        setInterval(animateFlow, 2000);
+        animateFlow();
+
+        // Reveal animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('[data-reveal]').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>

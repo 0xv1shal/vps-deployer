@@ -1,0 +1,72 @@
+---
+title: Email Providers
+description: SMTP configuration for popular email providers.
+---
+
+## Gmail
+
+| Setting | Value |
+|---|---|
+| **SMTP Host** | `smtp.gmail.com` |
+| **SMTP Port** | `587` |
+| **Username** | Your Gmail address |
+| **Password** | App password (not your Google password) |
+
+### Getting an App Password
+
+1. Go to your Google Account → Security
+2. Enable **2-Step Verification** (if not already enabled)
+3. Go to **App passwords**
+4. Generate a new app password for "Mail"
+5. Use this 16-character password in VPS Deployer
+
+## SendGrid
+
+| Setting | Value |
+|---|---|
+| **SMTP Host** | `smtp.sendgrid.net` |
+| **SMTP Port** | `587` |
+| **Username** | `apikey` (literally this string) |
+| **Password** | Your SendGrid API key |
+| **From** | A verified sender email |
+
+## Amazon SES
+
+| Setting | Value |
+|---|---|
+| **SMTP Host** | `email-smtp.<region>.amazonaws.com` |
+| **SMTP Port** | `587` |
+| **Username** | Your SES SMTP username |
+| **Password** | Your SES SMTP password |
+| **From** | A verified email address or domain |
+
+:::note
+SES SMTP credentials are different from your AWS access keys. Generate them in the SES console under **SMTP Settings → Create My SMTP Credentials**.
+:::
+
+## Outlook / Microsoft 365
+
+| Setting | Value |
+|---|---|
+| **SMTP Host** | `smtp-mail.outlook.com` |
+| **SMTP Port** | `587` |
+| **Username** | Your Outlook email address |
+| **Password** | Your Outlook password |
+
+## Mailgun
+
+| Setting | Value |
+|---|---|
+| **SMTP Host** | `smtp.mailgun.org` |
+| **SMTP Port** | `587` |
+| **Username** | `postmaster@<your-domain>` |
+| **Password** | Your Mailgun SMTP password |
+
+## Troubleshooting
+
+| Error | Cause | Fix |
+|---|---|---|
+| `Authentication failed` | Wrong credentials | Verify username/password, check app password for Gmail |
+| `Connection refused` | Wrong host/port | Double-check SMTP settings |
+| `Connection timeout` | Firewall blocking | Check outbound firewall rules on port 587/465 |
+| `Sender not verified` | SES/Mailgun restriction | Verify your sender email in the provider console |

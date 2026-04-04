@@ -1,0 +1,47 @@
+---
+title: Environment Variables
+description: Manage per-project environment variables through the UI.
+---
+
+## Overview
+
+Each project has its own set of environment variables, stored both in the SQLite database and as a `.env` file in the project workspace directory.
+
+## Adding Variables
+
+On the project details page:
+
+1. Scroll to the **Environment Variables** section
+2. Enter a key and value
+3. Click **Add**
+
+Variables are available to your build commands as standard environment variables.
+
+## How It Works
+
+When you add an env var through the UI:
+
+1. It's saved to the `project_env` table in the database
+2. It's written to `<working-dir>/<project-id>/.env`
+3. Before each deployment, the `.env` file is loaded into the process environment
+
+## Editing and Deleting
+
+- **Edit**: Click on an existing variable to modify its value
+- **Delete**: Remove a variable from both the database and the `.env` file
+
+## Common Use Cases
+
+```bash
+NODE_ENV=production
+DATABASE_URL=postgresql://user:pass@localhost:5432/mydb
+API_KEY=your-api-key
+PORT=8080
+```
+
+## Security Notes
+
+- Env vars are stored in plain text in the database
+- The `.env` file is readable by the user running the service
+- Never store secrets that require encryption — use a dedicated secrets manager for those
+- The `.env` file is never committed to your repository (it lives in the workspace, not the cloned repo)

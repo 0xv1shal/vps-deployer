@@ -1,0 +1,81 @@
+---
+title: Build Commands
+description: Define and manage per-project build and deploy command sequences.
+---
+
+## Overview
+
+Build commands are the heart of VPS Deployer. Each project has an ordered list of shell commands that run sequentially during deployment.
+
+## Adding Commands
+
+On the project details page:
+
+1. Scroll to the **Commands** section
+2. Enter your command
+3. Click **Add**
+
+Commands are numbered starting from 1 and execute in order.
+
+## Example Command Sequence
+
+For a typical Node.js application:
+
+```
+1. git pull origin main
+2. npm install
+3. npm run build
+4. pm2 restart app
+```
+
+For a Docker-based deployment:
+
+```
+1. git pull origin main
+2. docker compose down
+3. docker compose build
+4. docker compose up -d
+```
+
+## Important Rules
+
+### Each Command Runs Independently
+
+Commands do **not** share state. A `cd` in command 1 will not affect command 2. If you need to change directories, chain it:
+
+```bash
+cd /var/www/myapp && npm install
+```
+
+### Working Directory
+
+All commands run inside the project workspace directory (`<working-dir>/<project-id>/`). This is where your repository is cloned.
+
+### Timeout
+
+Each command has a **5-minute timeout**. If a command runs longer than that, it's killed with `SIGKILL` and the deployment is marked as failed.
+
+### Dangerous Commands
+
+The following are blocked:
+
+- `rm -rf /`
+- `shutdown`
+- `reboot`
+- `mkfs`
+- Fork bombs (`:(){ :|:& };:`)
+
+This is a basic string-matching check, not a full security sandbox.
+
+### Exit Codes
+
+- Exit code `0` = success, next command runs
+- Non-zero exit code = failure, deployment stops
+
+## Reordering Commands
+
+You can reorder commands through the UI. The sequence number determines execution order.
+
+## Editing Commands
+
+Click on any command to edit it. Changes take effect on the next deployment.

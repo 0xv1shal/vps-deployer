@@ -1,0 +1,109 @@
+---
+title: HTTPS Setup
+description: Secure VPS Deployer with TLS certificates.
+---
+
+## Option 1: Caddy (Recommended)
+
+Caddy automatically provisions and renews TLS certificates from Let's Encrypt. Zero configuration needed beyond your domain name.
+
+### Install Caddy
+
+```bash
+sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+sudo apt update
+sudo apt install caddy
+```
+
+### Configure
+
+Create `/etc/caddy/Caddyfile`:
+
+```text
+deploy.example.com {
+    reverse_proxy 127.0.0.1:3000
+}
+```
+
+### Start Caddy
+
+```bash
+sudo systemctl enable --now caddy
+```
+
+Caddy will automatically:
+1. Obtain a TLS certificate from Let's Encrypt
+2. Redirect HTTP to HTTPS
+3. Renew certificates before they expire
+
+## Option 2: Nginx + Certbot
+
+### Install Nginx and Certbot
+
+```bash
+sudo apt install nginx certbot python3-certbot-nginx
+```
+
+### Configure Nginx
+
+Create `/etc/nginx/sites-available/vps-deployer`:
+
+```nginx
+server {
+    listen 80;
+    server_name deploy.example.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+Enable the site:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/vps-deployer /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+### Get TLS Certificate
+
+```bash
+sudo certbot --nginx -d deploy.example.com
+```
+
+Certbot will:
+1. Verify domain ownership
+2. Obtain a certificate from Let's Encrypt
+3. Update your Nginx config with SSL settings
+4. Set up automatic renewal
+
+## Option 3: Cloudflare Tunnel
+
+If you don't want to open ports on your VPS:
+
+1. Install `cloudflared` on your VPS
+2. Create a tunnel in the Cloudflare dashboard
+3. Route `deploy.example.com` to `http://localhost:3000`
+
+Cloudflare handles TLS termination and DDoS protection.
+
+## DNS Requirements
+
+For Let's Encrypt to work, your domain must:
+- Point to your VPS IP address (A record)
+- Be publicly accessible on port 80 (for HTTP-01 challenge)
+
+## Updating Your Webhook URL
+
+After setting up HTTPS, update your GitHub webhook URL to use `https://`:
+
+```
+https://deploy.example.com/webhook/<project-id>
+```

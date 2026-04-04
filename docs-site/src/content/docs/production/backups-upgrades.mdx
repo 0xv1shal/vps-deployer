@@ -1,0 +1,101 @@
+---
+title: Backups & Upgrades
+description: Back up your data and upgrade VPS Deployer safely.
+---
+
+## Backing Up
+
+### What to Back Up
+
+The entire working directory contains everything you need:
+
+```
+/opt/vps-deployer/
+├── vps-deployer.db      # Database (all state)
+├── vps-deployer.log     # Application logs
+├── caddy.config         # Reference config
+├── nginx.config         # Reference config
+└── <project-id>/        # Project workspaces
+```
+
+### Manual Backup
+
+```bash
+tar -czf vps-deployer-backup-$(date +%Y%m%d).tar.gz /opt/vps-deployer/
+```
+
+### Automated Backup
+
+Add a cron job for daily backups:
+
+```bash
+0 2 * * * tar -czf /backups/vps-deployer-$(date +\%Y\%m\%d).tar.gz /opt/vps-deployer/
+```
+
+### Restoring
+
+```bash
+# Stop the service
+vps-deployer uninstall
+
+# Restore from backup
+tar -xzf vps-deployer-backup-20250101.tar.gz -C /
+
+# Reconfigure (uses existing database)
+vps-deployer config -w /opt/vps-deployer -p 3000 -s your-secret-key
+
+# Start
+vps-deployer start
+```
+
+## Upgrading
+
+### Check Current Version
+
+```bash
+vps-deployer --version
+```
+
+### Upgrade via npm
+
+```bash
+npm update -g vps-deployer
+```
+
+### Restart the Service
+
+```bash
+systemctl --user restart vps-deployer
+```
+
+### Post-Upgrade Checklist
+
+1. Check the service is running: `systemctl --user status vps-deployer`
+2. Verify the web UI loads
+3. Check logs for errors: `journalctl --user -u vps-deployer -f`
+4. Test a manual deployment
+
+### Breaking Changes
+
+Check the [GitHub releases page](https://github.com/0xv1shal/vps-deployer/releases) for breaking changes before upgrading. Major version bumps may require:
+
+- Database migrations (handled automatically)
+- Config file updates
+- Re-running `vps-deployer config`
+
+### Rollback
+
+If an upgrade causes issues:
+
+```bash
+# Stop the service
+systemctl --user stop vps-deployer
+
+# Install the previous version
+npm install -g vps-deployer@<previous-version>
+
+# Restart
+vps-deployer start
+```
+
+Your database and working directory are not affected by version changes.

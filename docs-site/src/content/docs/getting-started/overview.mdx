@@ -1,0 +1,49 @@
+---
+title: Overview
+description: What is VPS Deployer and why you should use it.
+---
+
+VPS Deployer is a lightweight, self-hosted continuous deployment (CD) system that runs on your Linux VPS. It gives you a web UI to manage projects, accepts GitHub webhooks for automatic deployments, and sends email notifications when deployments succeed or fail.
+
+## Why VPS Deployer?
+
+Most CI/CD tools are overkill for personal projects or small teams. GitHub Actions, GitLab CI, and Jenkins require external infrastructure, complex YAML configs, or heavy server resources. VPS Deployer takes a different approach:
+
+- **No external services** — everything runs on your VPS
+- **No YAML config files** — configure everything through the web UI
+- **No root required** — runs as a user-level systemd service
+- **Single SQLite database** — no PostgreSQL, Redis, or message queues
+- **Under 5 minutes to set up** — one npm install, one config command
+
+## What It Does
+
+| Capability | Description |
+|---|---|
+| **Web UI** | Dashboard to monitor projects, deployments, and logs |
+| **GitHub Webhooks** | Push to a branch and your VPS pulls and deploys automatically |
+| **Manual Deploys** | Trigger deployments from the web UI with one click |
+| **Email Alerts** | SMTP-based notifications for deployment events |
+| **Custom Commands** | Define any sequence of shell commands per project |
+| **Env Var Management** | Manage `.env` files through the UI |
+
+## What It Doesn't Do
+
+- It does **not** automatically pull your repository on webhook receipt — you must include `git pull` as a command
+- It does **not** run concurrent deployments — a single-worker queue ensures serial execution
+- It does **not** support multiple users — single-user registration model
+- It does **not** persist queued jobs across restarts — the queue is in-memory
+
+## Architecture at a Glance
+
+```
+GitHub ──webhook──▶ VPS Deployer ──commands──▶ Your App
+                       │
+                       ├── SQLite (state)
+                       ├── Email (notifications)
+                       └── Web UI (management)
+```
+
+## Next Steps
+
+- [Installation](/getting-started/installation/) — install and configure VPS Deployer
+- [First Deployment](/getting-started/first-deployment/) — create a project and deploy

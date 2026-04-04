@@ -1,0 +1,58 @@
+---
+title: Managing Projects
+description: Create, view, update, and delete projects.
+---
+
+## Creating a Project
+
+Navigate to **Projects → Create** and fill in the form:
+
+| Field | Description |
+|---|---|
+| **Name** | A friendly name for your project |
+| **GitHub URL** | Your repository URL (HTTPS or SSH format) |
+| **Branch** | The branch to deploy from |
+| **Auto Deploy** | Enable automatic deployments on push |
+| **Email Notifications** | Enable email alerts for deployment events |
+
+After creation, you'll see:
+- A unique **project ID** (UUID)
+- A **webhook URL** for GitHub
+- A **webhook secret** for HMAC verification
+
+## Viewing Projects
+
+The **Projects** page lists all your projects with:
+- Name and status
+- Last deployment time
+- Quick access to details
+
+## Project Details
+
+Click on a project to see:
+- Repository URL and branch
+- Build commands (editable)
+- Environment variables
+- Webhook URL and secret
+- Manual deploy button
+
+## Updating a Project
+
+On the project details page, you can:
+- Add, remove, or reorder build commands
+- Add or update environment variables
+- Toggle auto-deploy and email notifications
+
+## Deleting a Project
+
+:::caution[Warning]
+Deleting a project removes it from the database but does **not** delete the project workspace directory on disk. You'll need to clean up manually if desired.
+:::
+
+## Repository URL Format
+
+VPS Deployer normalizes repository URLs:
+- HTTPS URLs (`https://github.com/user/repo.git`) are converted to SSH format for cloning
+- SSH URLs (`git@github.com:user/repo.git`) are used as-is
+
+Make sure your VPS has SSH access to the repository, or use a deploy token with HTTPS.

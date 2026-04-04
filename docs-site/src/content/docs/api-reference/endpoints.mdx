@@ -1,0 +1,183 @@
+---
+title: API Endpoints
+description: Detailed request and response schemas for all JSON API endpoints.
+---
+
+## POST /deploy
+
+Trigger a manual deployment for a project.
+
+### Request
+
+**Headers:**
+```
+Cookie: connect.sid=<session-id>
+Content-Type: application/json
+```
+
+**Body:**
+```json
+{
+  "projectId": "<uuid>"
+}
+```
+
+### Response
+
+**200 OK:**
+```json
+{
+  "success": true,
+  "deployId": "<uuid>"
+}
+```
+
+**401 Unauthorized:**
+```json
+{
+  "success": false,
+  "error": "Authentication required"
+}
+```
+
+**404 Not Found:**
+```json
+{
+  "success": false,
+  "error": "Project not found"
+}
+```
+
+---
+
+## GET /deploy/:id
+
+Get deployment details including logs.
+
+### Request
+
+**Headers:**
+```
+Cookie: connect.sid=<session-id>
+```
+
+### Response
+
+**200 OK:**
+```json
+{
+  "success": true,
+  "deployment": {
+    "id": "<uuid>",
+    "proj_id": "<uuid>",
+    "started_at": "2025-01-15T10:30:00.000Z",
+    "finished_at": "2025-01-15T10:32:15.000Z",
+    "status": "success"
+  },
+  "logs": [
+    {
+      "id": "<uuid>",
+      "deploy_id": "<uuid>",
+      "cmd": "git pull origin main",
+      "log": "Already up to date.\n",
+      "success": true,
+      "started_at": "2025-01-15T10:30:01.000Z",
+      "finished_at": "2025-01-15T10:30:03.000Z",
+      "status": "success"
+    },
+    {
+      "id": "<uuid>",
+      "deploy_id": "<uuid>",
+      "cmd": "npm install",
+      "log": "added 42 packages in 3s\n",
+      "success": true,
+      "started_at": "2025-01-15T10:30:03.000Z",
+      "finished_at": "2025-01-15T10:30:06.000Z",
+      "status": "success"
+    }
+  ],
+  "project": {
+    "id": "<uuid>",
+    "name": "my-app",
+    "github_url": "git@github.com:user/my-app.git",
+    "branch_name": "main"
+  }
+}
+```
+
+**404 Not Found:**
+```json
+{
+  "success": false,
+  "error": "Deployment not found"
+}
+```
+
+---
+
+## POST /webhook/:projectId
+
+Receive a GitHub push webhook. No authentication required — uses HMAC-SHA256 verification.
+
+### Request
+
+**Headers:**
+```
+Content-Type: application/json
+X-Hub-Signature-256: sha256=<hex-digest>
+X-GitHub-Event: push
+```
+
+**Body:** GitHub's standard push event payload.
+
+### Response
+
+**200 OK:**
+```
+Deployment triggered
+```
+(Plain text response)
+
+**401 Unauthorized:**
+```
+Unauthorized
+```
+(Plain text — HMAC signature mismatch)
+
+**400 Bad Request:**
+```
+No body
+```
+(Plain text — missing or invalid payload)
+
+---
+
+## POST /email/test
+
+Send a test email to verify SMTP configuration.
+
+### Request
+
+**Headers:**
+```
+Cookie: connect.sid=<session-id>
+Content-Type: application/json
+```
+
+### Response
+
+**200 OK:**
+```json
+{
+  "success": true,
+  "message": "Test email sent"
+}
+```
+
+**400 Bad Request:**
+```json
+{
+  "success": false,
+  "error": "SMTP not configured"
+}
+```

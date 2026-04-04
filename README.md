@@ -33,7 +33,7 @@
 ## Prerequisites
 
 - **Linux** with systemd (user-level services)
-- **Node.js** >= 18
+- **Node.js** >= 20
 - **npm** or **pnpm**
 
 ## Quick Start

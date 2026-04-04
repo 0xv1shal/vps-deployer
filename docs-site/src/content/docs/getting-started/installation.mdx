@@ -1,0 +1,105 @@
+---
+title: Installation
+description: Install VPS Deployer on your VPS and get it running.
+---
+
+## Prerequisites
+
+Before you begin, make sure your VPS meets these requirements:
+
+- **Linux** with systemd (user-level services)
+- **Node.js** >= 20
+- **npm** or **pnpm**
+
+Check your versions:
+
+```bash
+node --version   # should be 18 or higher
+npm --version
+```
+
+## Step 1: Install the Package
+
+Install VPS Deployer globally via npm:
+
+```bash
+npm install -g vps-deployer
+```
+
+Verify the installation:
+
+```bash
+vps-deployer --version
+```
+
+## Step 2: Enable User Lingering
+
+By default, systemd user services stop when you log out. Enable lingering so your service persists:
+
+```bash
+loginctl enable-linger $USER
+```
+
+This is a one-time setup. Without it, your deployments would stop every time you disconnect from SSH.
+
+## Step 3: Configure
+
+Run the config command to generate your systemd service file, database, and reference configs:
+
+```bash
+vps-deployer config -w /opt/vps-deployer -p 3000 -s your-secret-key
+```
+
+| Flag | Description | Required |
+|---|---|---|
+| `-w, --working-dir` | Directory where projects and data will be stored | Yes |
+| `-p, --port` | Port for the web UI and API (1024–50000) | Yes |
+| `-s, --session-key` | Secret key for session encryption (min 6 characters) | Yes |
+
+### What This Creates
+
+- **Systemd service file** at `~/.config/systemd/user/vps-deployer.service`
+- **SQLite database** at `<working-dir>/vps-deployer.db`
+- **Reference configs** for Caddy and Nginx reverse proxies
+- **Log file** at `<working-dir>/vps-deployer.log`
+
+The command exits immediately after setup — it does not start the server.
+
+## Step 4: Start the Service
+
+```bash
+vps-deployer start
+```
+
+This enables and starts the user-level systemd service. Your terminal is freed immediately — the process runs in the background.
+
+Verify it's running:
+
+```bash
+systemctl --user status vps-deployer
+```
+
+## Step 5: Access the Web UI
+
+Open your browser and navigate to:
+
+```
+http://<your-server-ip>:3000
+```
+
+You'll be prompted to register an account. Only one user can register — the first one wins.
+
+## Development Mode
+
+If you want to run VPS Deployer in the foreground (useful for testing or development), use the `dev` command instead:
+
+```bash
+vps-deployer dev -w /opt/vps-deployer -p 3000 -s your-secret-key
+```
+
+This skips systemd setup and runs the Express server directly in your terminal. Press `Ctrl+C` to stop.
+
+## Next Steps
+
+- [First Deployment](/getting-started/first-deployment/) — create your first project and deploy
+- [CLI Commands](/configuration/cli-commands/) — full reference of all available commands

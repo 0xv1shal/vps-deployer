@@ -1,0 +1,61 @@
+---
+title: SMTP Setup
+description: Configure email notifications for deployment events.
+---
+
+## Overview
+
+VPS Deployer can send email notifications when deployments are triggered and when they complete (success or failure).
+
+## Configuring SMTP
+
+1. Navigate to **Settings** in the web UI
+2. Fill in your SMTP configuration:
+
+| Field | Description |
+|---|---|
+| **Username** | SMTP server username |
+| **Password** | SMTP server password or app password |
+| **SMTP Host** | SMTP server address (e.g., `smtp.gmail.com`) |
+| **SMTP Port** | Port number (usually 587 for TLS, 465 for SSL) |
+| **From** | The email address emails will be sent from |
+
+3. Click **Save**
+
+## Testing Your Configuration
+
+After saving, click **Send Test Email** to verify your SMTP settings work. You'll receive a test email at your registered account email address.
+
+## Enabling Per-Project Notifications
+
+Email notifications are controlled per-project:
+
+1. Go to your project details page
+2. Toggle **Email Notifications** on or off
+3. Notifications go to the email address registered to your account
+
+## Email Types
+
+Two types of emails are sent:
+
+### Deployment Triggered
+
+Sent when a deployment starts. Includes:
+- Project name
+- Branch
+- Commit message and author
+- Deployment ID
+
+### Deployment Result
+
+Sent when a deployment completes. Includes:
+- Project name
+- Status (success or failed)
+- Duration
+- Commit info
+- Link to view logs
+
+## Disabling Notifications
+
+- **Per project**: Toggle off in project settings
+- **Globally**: Clear SMTP settings in the Settings page

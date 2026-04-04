@@ -1,0 +1,80 @@
+---
+title: Development Setup
+description: Set up your local environment for contributing to VPS Deployer.
+---
+
+## Prerequisites
+
+- **Node.js** >= 20
+- **npm** or **pnpm**
+- **Git**
+
+## Clone the Repository
+
+```bash
+git clone https://github.com/0xv1shal/vps-deployer.git
+cd vps-deployer
+```
+
+## Install Dependencies
+
+```bash
+npm install
+```
+
+## Run in Development Mode
+
+```bash
+npm run dev -- -w /tmp/vps-deployer -p 3000 -s dev-secret-key
+```
+
+This starts the Express server in the foreground with:
+- Working directory: `/tmp/vps-deployer` (auto-created)
+- Port: `3000`
+- Session key: `dev-secret-key`
+
+Open `http://localhost:3000` in your browser.
+
+## Build for Production
+
+```bash
+npm run build
+```
+
+This compiles TypeScript and copies Pug view files to `dist/`.
+
+## Run the Built Version
+
+```bash
+npm start -- -w /tmp/vps-deployer -p 3000 -s dev-secret-key
+```
+
+## Project Structure
+
+```
+src/
+├── index.ts                    # CLI entry point
+├── app.ts                      # Express app setup
+├── db/                         # SQLite database initialization
+├── middleware/                  # Auth middleware
+├── types/                      # TypeScript type augmentations
+├── utils/                      # CLI and config utilities
+├── helpers/                    # Shared helper functions
+└── modules/                    # Feature modules
+    ├── auth/                   # Login/register
+    ├── dashboard/              # Home page
+    ├── project/                # Project CRUD
+    ├── deployer/               # Deployment logic
+    ├── webhook/                # GitHub webhook receiver
+    ├── settings/               # SMTP configuration
+    └── common/                 # Shared views (404, etc.)
+```
+
+## TypeScript Configuration
+
+The project uses strict TypeScript settings:
+
+- `verbatimModuleSyntax` — explicit import/export types
+- `exactOptionalPropertyTypes` — strict optional handling
+- `noUncheckedIndexedAccess` — indexed access returns `T | undefined`
+- `strictNullChecks` — null/undefined must be handled explicitly

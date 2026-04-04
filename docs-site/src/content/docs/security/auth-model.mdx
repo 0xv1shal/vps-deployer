@@ -1,0 +1,55 @@
+---
+title: Auth Model
+description: How authentication and sessions work in VPS Deployer.
+---
+
+## Single-User Model
+
+VPS Deployer is designed for a **single user**. The first person to register becomes the sole account holder. After registration, the `/register` endpoint is permanently disabled.
+
+### Registration Flow
+
+1. Visit the web UI for the first time
+2. You'll be redirected to `/register`
+3. Enter your email and password
+4. Account is created with bcrypt-hashed password
+5. All future registration attempts return `403 Forbidden`
+
+### Login Flow
+
+1. Enter your email and password at `/login`
+2. Password is verified using bcrypt
+3. On success, a session is created and stored in memory
+4. You're redirected to the dashboard
+
+## Session Management
+
+- **Storage**: In-memory via `express-session`
+- **Secret**: Provided via the `-s` CLI flag at config time
+- **Cookie config**: `secure: "auto"` (sent over HTTPS when available)
+- **Proxy trust**: `app.set('trust proxy', true)` for correct cookie behavior behind reverse proxies
+
+### Session Lifetime
+
+Sessions persist until:
+- The browser is closed (if using session cookies)
+- The server restarts (in-memory sessions are lost)
+- The user logs out
+
+:::caution[Server Restart]
+Since sessions are stored in memory, **all users are logged out** when the service restarts. This is a trade-off for simplicity — no Redis or database-backed sessions required.
+:::
+
+## Rate Limiting
+
+Auth endpoints (`/login`, `/register`) are rate-limited to **40 requests per minute per IP**. This prevents brute-force attacks on the login form.
+
+## Route Protection
+
+Authentication is applied **per-route**, not globally. This ensures:
+
+- `/webhook/*` remains accessible without authentication (GitHub needs to reach it)
+- `/login` and `/register` are accessible to unauthenticated users
+- All other routes require a valid session
+
+The `requireAuth` middleware redirects unauthenticated requests to `/login`.

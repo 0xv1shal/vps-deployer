@@ -1,0 +1,65 @@
+---
+title: Webhook Payload
+description: Structure of the GitHub push event payload that VPS Deployer receives.
+---
+
+## Overview
+
+When GitHub sends a push event webhook, it includes a JSON payload with information about the push. VPS Deployer extracts specific fields from this payload to create deployment records.
+
+## Payload Structure
+
+VPS Deployer uses the following fields from GitHub's push event:
+
+```json
+{
+  "ref": "refs/heads/main",
+  "head_commit": {
+    "id": "abc123def456",
+    "message": "Fix: update deployment config",
+    "timestamp": "2025-01-15T10:00:00Z",
+    "author": {
+      "name": "John Doe",
+      "email": "john@example.com"
+    }
+  },
+  "repository": {
+    "name": "my-app",
+    "full_name": "user/my-app",
+    "html_url": "https://github.com/user/my-app",
+    "clone_url": "https://github.com/user/my-app.git",
+    "ssh_url": "git@github.com:user/my-app.git"
+  },
+  "pusher": {
+    "name": "user",
+    "email": "user@example.com"
+  }
+}
+```
+
+## Fields Used by VPS Deployer
+
+| Field | Purpose |
+|---|---|
+| `ref` | Determines which branch was pushed to. Only matches the configured branch trigger a deployment. |
+| `head_commit.id` | Stored as the commit SHA in the deployment record. |
+| `head_commit.message` | Displayed in deployment logs and email notifications. |
+| `head_commit.author.name` | Shown as the commit author. |
+| `head_commit.timestamp` | Used for deployment timing. |
+| `repository.name` | Used in email notifications. |
+| `repository.html_url` | Linked in email notifications. |
+
+## Branch Matching
+
+VPS Deployer extracts the branch name from `ref`:
+
+```
+refs/heads/main → main
+refs/heads/feature/new-feature → feature/new-feature
+```
+
+Only if this matches the project's configured `branch_name` will a deployment be triggered.
+
+## Empty Payload Handling
+
+If the webhook body is missing or not an object, the request is rejected with a `400` response.

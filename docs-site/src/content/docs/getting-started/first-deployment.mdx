@@ -1,0 +1,98 @@
+---
+title: First Deployment
+description: Create a project and deploy your first application.
+---
+
+## Step 1: Create a Project
+
+1. Log into the VPS Deployer web UI
+2. Navigate to **Projects** → **Create**
+3. Fill in the form:
+
+| Field | Description |
+|---|---|
+| **Name** | A friendly name for your project |
+| **GitHub URL** | Your repository URL (HTTPS or SSH) |
+| **Branch** | The branch to deploy from (e.g., `main`) |
+| **Auto Deploy** | Enable to deploy automatically on push |
+| **Email Notifications** | Enable to receive deployment alerts |
+
+4. Click **Create**
+
+After creation, you'll see the project details page with your unique webhook URL and secret.
+
+## Step 2: Add Build Commands
+
+On the project details page, add your deployment commands in order. For example:
+
+```
+1. git pull origin main
+2. npm install
+3. npm run build
+4. pm2 restart app
+```
+
+:::caution[Important]
+Each command runs independently. If you need to change directories, chain it in the same command:
+
+```bash
+cd /var/www/myapp && npm install
+```
+
+A `cd` in one command entry will **not** carry over to the next.
+:::
+
+## Step 3: Configure the GitHub Webhook
+
+1. Copy the **webhook URL** and **webhook secret** from the project details page
+2. Go to your GitHub repo: **Settings → Webhooks → Add webhook**
+3. Configure:
+
+| Setting | Value |
+|---|---|
+| **Payload URL** | Your webhook URL (e.g., `http://your-vps:3000/webhook/<project-id>`) |
+| **Content type** | `application/json` |
+| **Secret** | The webhook secret from VPS Deployer |
+| **Events** | `Just the push event` |
+
+4. Click **Add webhook**
+
+## Step 4: Deploy
+
+### Automatic (with webhook)
+
+Push to your configured branch:
+
+```bash
+git push origin main
+```
+
+VPS Deployer will receive the webhook, verify the signature, and start deploying.
+
+### Manual
+
+Click the **Deploy** button on the project details page in the web UI. This triggers a deployment immediately without waiting for a webhook.
+
+## Step 5: Monitor
+
+Navigate to **Deployments** to see:
+
+- Deployment status (running, success, failed)
+- Duration
+- Real-time log output
+- Command-by-command results
+
+## Troubleshooting
+
+| Issue | Solution |
+|---|---|
+| Webhook not firing | Check GitHub webhook delivery logs for errors |
+| Deployment stuck | Check `journalctl --user -u vps-deployer -f` for server logs |
+| Command fails | Review deployment logs — each command's output is captured |
+| Permission denied | See [Privileged Commands](/security/best-practices/) for sudoers setup |
+
+## Next Steps
+
+- [Managing Projects](/projects/managing-projects/) — full CRUD operations
+- [GitHub Webhook Setup](/webhooks/github-setup/) — detailed webhook configuration
+- [Viewing Logs](/deployments/viewing-logs/) — understanding deployment output

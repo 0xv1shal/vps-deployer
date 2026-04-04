@@ -1,0 +1,81 @@
+---
+title: Viewing Logs
+description: Understanding and reading deployment logs.
+---
+
+## Overview
+
+Every deployment generates detailed logs that capture the output of each command as it runs.
+
+## Where to Find Logs
+
+- **Deployment details page**: Click on any deployment in the **Deployments** list
+- **Real-time output**: The details page polls for new log entries every 3 seconds
+
+## Log Structure
+
+Each command in a deployment gets its own log entry:
+
+| Field | Description |
+|---|---|
+| **Command** | The shell command that was executed |
+| **Output** | Combined stdout and stderr |
+| **Status** | Success (exit 0) or failed (non-zero exit) |
+| **Started at** | When the command began |
+| **Finished at** | When the command completed |
+
+## Reading Real-Time Logs
+
+On the deployment details page:
+
+1. The page automatically polls `/deploy/:id` every 3 seconds
+2. New log entries appear as they're generated
+3. Completed deployments show the final status badge
+
+## Server Logs
+
+For application-level logs (not deployment-specific), check:
+
+```bash
+# Application log file
+tail -f /opt/vps-deployer/vps-deployer.log
+
+# Systemd journal
+journalctl --user -u vps-deployer -f
+```
+
+These capture:
+- Server startup/shutdown events
+- Webhook verification results
+- Email sending status
+- Errors and warnings
+
+## Log Retention
+
+Deployment logs are stored in the SQLite database and persist until manually cleaned. There is no automatic log rotation or deletion.
+
+## Common Log Patterns
+
+### Successful Deployment
+
+```
+[INFO] Deploy #abc123 started
+[INFO] Command 1: git pull origin main
+  Already up to date.
+[INFO] Command 2: npm install
+  added 42 packages in 3s
+[INFO] Command 3: pm2 restart app
+  [PM2] Applying action restartProcessId on app [app]
+[INFO] Deploy #abc123 completed successfully
+```
+
+### Failed Deployment
+
+```
+[INFO] Deploy #def456 started
+[INFO] Command 1: git pull origin main
+  Already up to date.
+[INFO] Command 2: npm run build
+  Error: Cannot find module './config'
+[ERROR] Deploy #def456 failed at command 2
+```

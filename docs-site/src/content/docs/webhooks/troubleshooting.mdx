@@ -1,0 +1,61 @@
+---
+title: Webhook Troubleshooting
+description: Common webhook issues and how to fix them.
+---
+
+## Webhook Returns 404
+
+**Cause**: The project ID in the webhook URL doesn't match any project.
+
+**Fix**:
+1. Go to your project details page in VPS Deployer
+2. Copy the webhook URL from there
+3. Update the Payload URL in GitHub webhook settings
+
+## Webhook Returns 401
+
+**Cause**: The HMAC signature doesn't match. This means either:
+- The webhook secret in GitHub doesn't match VPS Deployer's
+- The request was tampered with
+
+**Fix**:
+1. Copy the webhook secret from your project details page
+2. Go to GitHub → Settings → Webhooks
+3. Update the Secret field with the correct value
+4. Save and re-deliver the last webhook
+
+## Webhook Returns 200 But No Deployment
+
+**Cause**: The push was to a branch that doesn't match your configured branch.
+
+**Fix**:
+1. Check the branch name in your project settings
+2. Make sure it matches the branch you're pushing to
+3. Pushes to other branches are silently ignored (this is by design)
+
+## GitHub Shows "Delivery Failed"
+
+**Cause**: VPS Deployer is unreachable from GitHub's servers.
+
+**Fix**:
+1. Make sure your VPS is accessible from the internet on the configured port
+2. Check firewall rules: `sudo ufw status`
+3. If behind a reverse proxy, verify the proxy is forwarding `/webhook/*` correctly
+4. Check server logs: `journalctl --user -u vps-deployer -f`
+
+## Multiple Deployments on Single Push
+
+**Cause**: GitHub may send multiple webhook deliveries for a single push event (retries).
+
+**Fix**:
+- This is handled by the deployment queue — duplicate webhooks queue up and run sequentially
+- If you want to prevent this, ensure your VPS responds quickly (within 10 seconds) so GitHub doesn't retry
+
+## Webhook Works Locally But Not from GitHub
+
+**Cause**: Your VPS is not publicly accessible.
+
+**Fix**:
+- Use a reverse proxy with a public domain
+- Configure port forwarding on your router (if applicable)
+- Use a tunnel like Cloudflare Tunnel or ngrok for testing

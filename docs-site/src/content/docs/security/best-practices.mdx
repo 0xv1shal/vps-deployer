@@ -1,0 +1,96 @@
+---
+title: Best Practices
+description: Security recommendations for running VPS Deployer in production.
+---
+
+## Use a Strong Session Key
+
+The session key (`-s` flag) is used to sign session cookies. Use a long, random string:
+
+```bash
+vps-deployer config -w /opt/vps-deployer -p 3000 -s $(openssl rand -hex 32)
+```
+
+## Run as a Non-Root User
+
+VPS Deployer is designed to run as a user-level systemd service. Never run it as root:
+
+```bash
+# Create a dedicated user
+sudo useradd -m -s /bin/bash vpsdeployer
+sudo su - vpsdeployer
+npm install -g vps-deployer
+```
+
+## Use HTTPS in Production
+
+Always expose VPS Deployer behind HTTPS. See [HTTPS Setup](/production/https-setup/) for configuration.
+
+Without HTTPS:
+- Session cookies can be intercepted
+- Webhook secrets travel in plain text
+- Build command output is exposed
+
+## Configure Firewall Rules
+
+Only expose the ports you need:
+
+```bash
+# Allow SSH
+sudo ufw allow 22
+
+# Allow HTTP/HTTPS (if using reverse proxy)
+sudo ufw allow 80
+sudo ufw allow 443
+
+# Block direct access to VPS Deployer port
+sudo ufw deny 3000
+```
+
+## Use Sudoers for Privileged Commands
+
+If your build commands need `sudo` (e.g., `systemctl restart nginx`), configure sudoers with specific rules:
+
+```bash
+# /etc/sudoers.d/vps-deployer
+vpsdeployer ALL=(ALL) NOPASSWD: /usr/bin/pm2, /usr/bin/systemctl restart nginx, /usr/bin/docker compose *
+```
+
+Never use `NOPASSWD: ALL`. Only whitelist the exact commands you need.
+
+## Keep Your Working Directory Restricted
+
+Set permissions so only the VPS Deployer user can access the working directory:
+
+```bash
+chmod 700 /opt/vps-deployer
+```
+
+## Rotate Webhook Secrets
+
+If you suspect a webhook secret has been compromised:
+1. Delete the project in VPS Deployer
+2. Recreate it (generates a new secret)
+3. Update the webhook in GitHub
+
+## Monitor Logs
+
+Regularly check both application and system logs:
+
+```bash
+# Application logs
+tail -f /opt/vps-deployer/vps-deployer.log
+
+# Systemd logs
+journalctl --user -u vps-deployer -f
+```
+
+## Back Up Regularly
+
+Back up your database and working directory:
+
+```bash
+tar -czf vps-deployer-backup-$(date +%Y%m%d).tar.gz /opt/vps-deployer/
+```
+
+Store backups off-site.

@@ -1,0 +1,60 @@
+---
+title: Guidelines
+description: Coding standards and contribution guidelines.
+---
+
+## Code Style
+
+- **No comments** unless absolutely necessary — code should be self-explanatory
+- **Explicit types** on function signatures — no implicit `any`
+- **Error handling** — use try/catch with specific error types, not generic catches
+- **Naming** — descriptive variable and function names, no abbreviations
+
+## TypeScript
+
+- Strict mode is enabled — no `any`, no unchecked index access
+- Use `verbatimModuleSyntax` — explicit `type` imports for type-only imports
+- Return types on all functions
+
+## Git Workflow
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feat/your-feature`
+3. Commit your changes with clear, descriptive messages
+4. Push to your fork and open a pull request
+
+### Commit Messages
+
+Use conventional commit format:
+
+```
+feat: add email notification for failed deployments
+fix: correct webhook signature verification
+docs: update installation instructions
+```
+
+## Pull Requests
+
+- Describe what the PR does and why
+- Link related issues
+- Keep PRs focused — one feature or fix per PR
+- Update documentation if behavior changes
+
+## Testing
+
+Currently the project does not have an automated test suite. When contributing:
+
+- Test manually with `npm run dev`
+- Verify the web UI works as expected
+- Test webhook delivery with a real GitHub repo
+- Check email notifications if your change affects them
+
+## Areas That Need Help
+
+- **Tests** — unit tests for helpers, integration tests for routes
+- **Session persistence** — database-backed sessions instead of in-memory
+- **Queue persistence** — survive restarts without losing queued deployments
+- **Log rotation** — automatic cleanup of old deployment logs
+- **Multi-user support** — team accounts with roles
+- **API documentation** — OpenAPI/Swagger spec
+- **Docker support** — containerized deployment option

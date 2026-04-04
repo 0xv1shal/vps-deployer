@@ -1,0 +1,87 @@
+---
+title: Systemd Service
+description: How VPS Deployer integrates with systemd for process management.
+---
+
+## Service File Location
+
+When you run `vps-deployer config`, a user-level systemd unit file is created at:
+
+```
+~/.config/systemd/user/vps-deployer.service
+```
+
+## Generated Service File
+
+Here's an example of what gets generated:
+
+```ini
+[Unit]
+Description=VPS Deployer Service (vps-deployer)
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/user/.nvm/versions/node/v24.14.0/bin/node /home/user/.nvm/versions/node/v24.14.0/bin/vps-deployer daemon -w "/opt/vps-deployer" -p "3000" -s "my-secret-key"
+WorkingDirectory=/opt/vps-deployer
+Restart=always
+RestartSec=5
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
+```
+
+Key details:
+
+- **Absolute paths** — both the Node.js binary and vps-deployer binary use absolute paths detected at config time
+- **`daemon` subcommand** — a hidden command that runs the Express server (not meant for direct CLI use)
+- **Quoted arguments** — all flags are quoted to handle special characters in session keys
+- **Auto-restart** — `Restart=always` ensures the service recovers from crashes
+- **Journal logging** — stdout/stderr go to `journalctl`
+
+## Managing the Service
+
+```bash
+# Start
+vps-deployer start
+
+# Check status
+systemctl --user status vps-deployer
+
+# View logs
+journalctl --user -u vps-deployer -f
+
+# Stop
+systemctl --user stop vps-deployer
+
+# Restart
+systemctl --user restart vps-deployer
+
+# Remove
+vps-deployer uninstall
+```
+
+## Persisting Across Reboots
+
+For the service to start automatically on boot, enable user lingering:
+
+```bash
+loginctl enable-linger $USER
+```
+
+Without this, the service stops when you log out of SSH.
+
+## Graceful Shutdown
+
+When the service receives `SIGTERM` (from `systemctl stop`), VPS Deployer:
+
+1. Stops accepting new HTTP connections
+2. Waits 5 seconds for existing connections to finish
+3. Closes the SQLite database
+4. Flushes pending log writes
+5. Exits with code 0
+
+A 10-second fallback forcefully closes all connections if graceful shutdown stalls.
