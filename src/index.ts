@@ -4,9 +4,8 @@ import { setPort, setSessKey, setWorkDirPath } from "./helpers/arg.helper.ts";
 import { createProxyAndLogConfigs } from "./helpers/config_files.helper.ts";
 import { convertDateToIST } from "./helpers/date.helper.ts";
 import { closeLogger, writeToLogFile } from "./helpers/logging.helper.ts";
-import { getArgs } from "./utils/cli.ts";
+import { setupCLI } from "./utils/cli.ts";
 import app, { initSessionAndRoutes } from "./app.ts";
-import { createSystemdService } from "./helpers/create_systemd_service.helper.ts";
 
 let server: ReturnType<typeof app.listen> | null = null;
 let isShuttingDown = false;
@@ -71,61 +70,40 @@ async function shutdown(signal: string) {
   setTimeout(() => {
     server?.closeAllConnections();
     process.exit(1);
-  }, 10000);
+  }, 2*60*1000);
 }
 
-function main() {
-  try {
-    if (process.getuid && process.getuid() !== 0) {
-      console.error("This command must be run as root. Use sudo.");
-      process.exit(1);
-    }
-    const [path, port, sessKey, isDev, isDaemon] = getArgs();
-    setWorkDirPath(path);
-    setPort(port);
-    setSessKey(sessKey);
-    initalizeDB();
-    createProxyAndLogConfigs();
+function startServer(port: number) {
+  initSessionAndRoutes(app);
+  server = app.listen(port, "0.0.0.0", () => {
+    writeToLogFile(`Server started`, {
+      source: "SERVER",
+      meta: { port },
+    });
+  });
+  server.on("connection", (socket) => {
+    socket.setTimeout(5000);
+    socket.on("timeout", () => socket.destroy());
+  });
+}
 
-    if (isDev || isDaemon) {
-      initSessionAndRoutes(app);
-      server = app.listen(port, "0.0.0.0", () => {
-        writeToLogFile(`Server started`, {
-          source: "SERVER",
-          meta: { port },
-        });
-      });
-
-      server.on("connection", (socket) => {
-        // VERY IMP : SOMETIMES A OLD STALE CONN WHICH IS IN OS LAYER GETS TO NODE AFTER THE NODE INSTANCE RESTARTS SO SERVER CANT BE CLOSED PROPERLY LEADING INTO FORCE SHUTDOWN INSTEAD OF GRACEFUL
-        // USE THIS SETTIMEOUT SO EVEN IF STALE CONN OPENS AGAiN IT GETS CLOSED
-        socket.setTimeout(5000);
-        socket.on("timeout", () => socket.destroy());
-      });
-    } else {
-      createSystemdService({
-        serviceName: "vps-deployer",
-        execPath: process.argv[1] ?? "",
-        args: process.argv.slice(2),
-        workingDir: path,
-      });
-
-      writeToLogFile(
-        `Systemd service file created. Run "vps-deployer start" to start the service.`,
-        {
-          source: "SYSTEM",
-        },
-      );
-      closeDB();
-      closeLogger();
-      console.log(`Systemd service file created. Run "vps-deployer start" to start the service.`)
-      process.exit(0);
-    }
-  } catch (error: any) {
-    console.log(error.message);
-    process.exit(1);
+function initFromEnv() {
+  const mode = process.env.VPS_DEPLOYER_MODE;
+  const workDir = process.env.VPS_WORK_DIR;
+  const portStr = process.env.VPS_PORT;
+  const sessKey = process.env.VPS_SESS_KEY;
+  if (!mode || !workDir || !portStr || !sessKey) return;
+  const port = Number.parseInt(portStr, 10);
+  setWorkDirPath(workDir);
+  setPort(port);
+  setSessKey(sessKey);
+  initalizeDB();
+  createProxyAndLogConfigs();
+  if (mode === "dev" || mode === "daemon") {
+    startServer(port);
   }
 }
+
 
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
@@ -148,4 +126,5 @@ process.on("unhandledRejection", (reason) => {
   shutdown("unhandledRejection");
 });
 
-main();
+setupCLI();
+initFromEnv();

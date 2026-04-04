@@ -1,5 +1,7 @@
-import { execSync } from "child_process";
+import { spawn } from "child_process";
 import fs from "fs";
+import path from "path";
+import { getHomeDir } from "./get_home_dir.helper.ts";
 import { writeToLogFile } from "./logging.helper.ts";
 
 type ServiceConfig = {
@@ -9,50 +11,56 @@ type ServiceConfig = {
   workingDir: string;
 };
 
-export const createSystemdService = ({
+const runSystemctl = (args: string[]): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const child = spawn("systemctl", ["--user", ...args], { stdio: "inherit" });
+    child.on("close", (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`systemctl --user ${args.join(" ")} exited with code ${code}`));
+    });
+  });
+};  
+
+export const createSystemdService = async ({
   serviceName,
   execPath,
   args,
   workingDir,
 }: ServiceConfig) => {
-  const serviceFilePath = `/etc/systemd/system/${serviceName}.service`;
+  const userDir = path.join(getHomeDir(), ".config", "systemd", "user");
+  const serviceFilePath = path.join(userDir, `${serviceName}.service`);
 
-  const execCmd = [execPath, ...args, "--daemon"].join(" ");
+  const execCmd = `${execPath} daemon ${args.join(" ")}`;
 
-  const serviceContent = `
-[Unit]
+  const serviceContent = `[Unit]
 Description=VPS Deployer Service (${serviceName})
 After=network.target
-
 [Service]
 Type=simple
 ExecStart=${execCmd}
 WorkingDirectory=${workingDir}
 Restart=always
 RestartSec=5
-User=root
-
-# logs go to journald
 StandardOutput=journal
 StandardError=journal
-
 [Install]
-WantedBy=multi-user.target
-`;
+WantedBy=default.target`;
 
   try {
-    // 1. write service file
-    fs.writeFileSync(serviceFilePath, serviceContent.trim());
-
-    // 2. reload systemd
-    execSync("systemctl daemon-reexec");
-    execSync("systemctl daemon-reload");
-
-    
-
-    writeToLogFile(`Service file created at ${serviceFilePath}. Run "vps-deployer start" to enable and start it.`, {level:"INFO", source:"SYS"});
+    // Ensure user systemd dir exists
+    if (!fs.existsSync(userDir)) {
+      fs.mkdirSync(userDir, { recursive: true });
+    }
+    // Write service file (no sudo needed — user's own home dir)
+    fs.writeFileSync(serviceFilePath, serviceContent);
+    // Reload user systemd
+    await runSystemctl(["daemon-reload"]);
+    writeToLogFile(`Service file created at ${serviceFilePath}. Run "vps-deployer start" to enable and start it.`, {
+      level: "INFO",
+      source: "SYS",
+    });
   } catch (err: any) {
-    writeToLogFile(`Systemd setup failed:${err.message}`,{level:"ERROR",source:"SYS"})
+    writeToLogFile(`Systemd setup failed: ${err.message}`, { level: "ERROR", source: "SYS" });
     throw err;
   }
 };
