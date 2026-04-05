@@ -91,7 +91,7 @@ Create your admin account with a username, password, and email address.
 
 ## Step 7: Configure Email Notifications (Optional)
 
-1. Navigate to **Settings** from the dashboard
+1. Navigate to **Settings → Email Settings** from the dashboard
 2. Enter your SMTP credentials:
    - SMTP host (e.g., `smtp.gmail.com`)
    - SMTP port (e.g., `587`)

@@ -34,7 +34,7 @@ const parseCommonOptions = (opts: { workingDir: string; port: string; sessionKey
 
 export const setupCLI = () => {
   const program = new Command();
-  program.description("a utility that helps u auto deploy things").version("1.1.2");
+  program.description("A lightweight, self-hosted continuous deployment system with a web UI").version("1.2.0");
   // ---- config subcommand ----
   program
     .command("config")

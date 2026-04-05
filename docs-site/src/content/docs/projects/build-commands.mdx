@@ -51,6 +51,12 @@ cd /var/www/myapp && npm install
 
 All commands run inside the project workspace directory (`<working-dir>/<project-id>/`). This is where your repository is cloned.
 
+### PATH Environment Variable
+
+Custom paths configured in **Settings → Path Settings** are prepended to the system `$PATH`. This allows you to use tools installed in non-standard locations (e.g., Node.js via nvm, custom binaries) without needing to specify full paths in your commands.
+
+For example, if you add `/home/user/.nvm/versions/node/v24.14.0/bin` to Path Settings, you can simply use `node` instead of the full path.
+
 ### Timeout
 
 Each command has a **5-minute timeout**. If a command runs longer than that, it's killed with `SIGKILL` and the deployment is marked as failed.

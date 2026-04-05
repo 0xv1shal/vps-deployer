@@ -1,0 +1,81 @@
+---
+title: Path Settings
+description: Configure system PATH for command execution.
+---
+
+## Overview
+
+Path Settings allows you to configure custom directories that should be available in the system `$PATH` when commands are executed during deployments.
+
+This is useful when:
+- You have Node.js installed via nvm in a non-standard location
+- You have custom binaries installed in user directories
+- You want to use commands without specifying full paths
+
+## How It Works
+
+When you add a path:
+
+1. The path is stored in the `path_settings` table
+2. Paths are ordered by their sequence number
+3. During deployment, all configured paths are **prepended** to the system `$PATH`
+4. Your custom paths take priority over system defaults
+
+## Adding a Path
+
+1. Navigate to **Settings → Path Settings** in the web UI
+2. Enter the full path in the input field (e.g., `/home/user/.nvm/versions/node/v24.14.0/bin`)
+3. Click **Add**
+
+The path will be added to the bottom of the list.
+
+## Managing Paths
+
+### Edit a Path
+
+Click the pencil icon on any path to edit it. A modal will appear where you can update the path value.
+
+### Delete a Path
+
+Click the trash icon on any path to remove it. The sequence numbers of remaining paths will be automatically renumbered.
+
+### Path Order
+
+Paths are executed in sequence order. The first path in the list has the highest priority. You can delete and re-add paths to change their order.
+
+## Example Use Cases
+
+### Node.js via nvm
+
+If you installed Node.js using nvm, add your nvm bin directory:
+
+```
+/home/user/.nvm/versions/node/v24.14.0/bin
+```
+
+Now you can use `node`, `npm`, `npx` directly without specifying the full path.
+
+### Custom Tools
+
+If you have custom scripts or tools installed in a specific directory:
+
+```
+/home/user/custom-tools/bin
+```
+
+## PATH Precedence
+
+Custom paths are **prepended** to the system PATH, not appended. This means:
+
+```
+/custom/path1:/custom/path2:/usr/local/bin:/usr/bin:/bin
+```
+
+Your custom paths are checked first, giving them priority over system binaries.
+
+## Security Notes
+
+- Only add paths you trust
+- Paths are stored in plain text in the database
+- Each command has a 5-minute timeout for safety
+- Dangerous commands like `rm -rf /` are blocked regardless of PATH settings

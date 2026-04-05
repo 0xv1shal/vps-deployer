@@ -5,12 +5,10 @@ const startCmdLog = (deployId: string, cmd: string) => {
   const db = getDB();
   const id = crypto.randomUUID();
 
-  db.prepare(
-    `
+  db.prepare(`
     INSERT INTO deployment_logs (id, deploy_id, cmd,status)
     VALUES (?, ?, ?,?)
-  `,
-  ).run(id, deployId, cmd, "running");
+  `).run(id, deployId, cmd,'running');
 
   return id;
 };
@@ -18,17 +16,15 @@ const startCmdLog = (deployId: string, cmd: string) => {
 const finishCmdLog = (
   logId: string,
   log: string,
-  status: "success" | "failed",
+  status: "success" | "failed"
 ) => {
   const db = getDB();
 
-  db.prepare(
-    `
+  db.prepare(`
     UPDATE deployment_logs
     SET log = ?, status = ?, finished_at = datetime('now')
     WHERE id = ?
-  `,
-  ).run(log, status, logId);
+  `).run(log, status, logId);
 };
 
 export const dangerCmdDetector = (cmd: string) => {
@@ -43,34 +39,47 @@ export const dangerCmdDetector = (cmd: string) => {
   return dangerous.some((d) => cmd.includes(d));
 };
 
-export const runCmd = (cmd: string, projDir: string, deployId: string) => {
+const getMergedPath = () => {
+  const db = getDB();
+  const paths = db
+    .prepare("SELECT path FROM path_settings ORDER BY sequence ASC")
+    .all() as { path: string }[];
+  if (paths.length === 0) {
+    return process.env.PATH || "";
+  }
+  const userPath = paths.map((p) => p.path).join(":");
+  return userPath + ":" + (process.env.PATH || "");
+};
+
+export const runCmd =  (
+  cmd: string,
+  projDir: string,
+  deployId: string
+) => {
   if (dangerCmdDetector(cmd)) {
     throw new Error("Dangerous command blocked");
   }
 
-  const logId = startCmdLog(deployId, cmd);
+  const logId =  startCmdLog(deployId, cmd);
 
   let stderr = "";
   let stdout = "";
   let isFinished = false;
 
   return new Promise<{ stdout: string; stderr: string }>((resolve, reject) => {
-    const shell = process.env.SHELL || "/bin/bash";
-
-    const child = spawn(shell, ["-lc", cmd], {
+    const mergedEnv = { ...process.env, PATH: getMergedPath() };
+    const child = spawn(cmd, {
       cwd: projDir,
-      env: process.env,
+      shell: true,
+      env:mergedEnv
     });
 
     // ⏱️ 5 min timeout
-    const timeout = setTimeout(
-      () => {
-        if (!isFinished) {
-          child.kill("SIGKILL");
-        }
-      },
-      5 * 60 * 1000,
-    );
+    const timeout = setTimeout(() => {
+      if (!isFinished) {
+        child.kill("SIGKILL");
+      }
+    }, 5 * 60 * 1000);
 
     child.stdout.on("data", (data) => {
       stdout += data.toString();
@@ -85,7 +94,7 @@ export const runCmd = (cmd: string, projDir: string, deployId: string) => {
       isFinished = true;
 
       clearTimeout(timeout);
-      finishCmdLog(logId, err.message, "failed");
+       finishCmdLog(logId, err.message, "failed");
 
       reject(new Error(`Failed to exec ${cmd}: ${err.message}`));
     });
@@ -100,19 +109,21 @@ export const runCmd = (cmd: string, projDir: string, deployId: string) => {
 
       // If killed by timeout
       if (signal === "SIGKILL") {
-        finishCmdLog(logId, combinedLog + "\n[Timeout: Killed]", "failed");
+         finishCmdLog(logId, combinedLog + "\n[Timeout: Killed]", "failed");
         return reject(new Error(`Command timed out: ${cmd}`));
       }
 
       if (code === 0) {
-        finishCmdLog(logId, combinedLog, "success");
+         finishCmdLog(logId, combinedLog, "success");
         return resolve({ stdout, stderr });
       }
 
-      finishCmdLog(logId, combinedLog, "failed");
+       finishCmdLog(logId, combinedLog, "failed");
 
       reject(
-        new Error(stderr.trim() || `Command failed: ${cmd} (code ${code})`),
+        new Error(
+          stderr.trim() || `Command failed: ${cmd} (code ${code})`
+        )
       );
     });
   });
@@ -121,7 +132,7 @@ export const runCmd = (cmd: string, projDir: string, deployId: string) => {
 export const runCmdSeq = async (
   commands: string[],
   projDir: string,
-  deployId: string,
+  deployId: string
 ) => {
   for (const cmd of commands) {
     await runCmd(cmd, projDir, deployId);

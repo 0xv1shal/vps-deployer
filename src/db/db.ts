@@ -74,6 +74,13 @@ const createTables = () => {
   FOREIGN KEY (deploy_id) REFERENCES deployment(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS path_settings (
+  id TEXT PRIMARY KEY,
+  path TEXT NOT NULL,
+  sequence INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
     CREATE INDEX IF NOT EXISTS idx_project_commands_proj_id 
       ON project_commands(proj_id);
 

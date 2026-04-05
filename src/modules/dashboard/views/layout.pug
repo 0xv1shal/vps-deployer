@@ -77,7 +77,7 @@ html
             li.nav-item
               a.nav-link(class=(active === "deployments" ? "active" : ""), href="/deployments") Deployments
             li.nav-item
-              a.nav-link(class=(active === "settings" ? "active" : ""), href="/settings") Settings
+              a.nav-link(class=(active === "settings" || active === "path_settings" ? "active" : ""), href="/settings") Settings
 
     // Main content
     main.container.my-4.flex-grow-1

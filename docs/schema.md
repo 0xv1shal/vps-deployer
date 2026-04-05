@@ -34,6 +34,7 @@ Note: all fields are optional over here
 | name | varchar | 
 | github_url | varchar | 
 | branch_name | varchar |
+| webhook_secret | varchar |
 | receive_email_notf | bool |
 | auto_deploy | bool |
 ---
@@ -63,6 +64,16 @@ Note: all fields are optional over here
 | deploy_id | uuid |
 | cmd | text |
 | log | text |
-| success | bool |
+| status | varchar (running/success/failed) |
 | started_at | timestamp |
 | finished_at | timestamp |
+
+---
+**Path Settings Table**
+
+| Column Names | Types | 
+|---|---|
+| id | uuid |
+| path | varchar |
+| sequence | int |
+| created_at | timestamp |

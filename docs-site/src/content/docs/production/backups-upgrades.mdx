@@ -50,38 +50,43 @@ vps-deployer start
 
 ## Upgrading
 
-### Check Current Version
+Upgrading VPS Deployer is simple. The `vps-deployer uninstall` command only removes the systemd service — it does **not** delete your database, working directory, or project files.
+
+### Step 1: Stop and Remove Service
 
 ```bash
-vps-deployer --version
+vps-deployer uninstall
 ```
 
-### Upgrade via npm
+### Step 2: Update the Package
 
 ```bash
 npm update -g vps-deployer
 ```
 
-### Restart the Service
+### Step 3: Reconfigure
 
 ```bash
-systemctl --user restart vps-deployer
+vps-deployer config -w /opt/vps-deployer -p 3000 -s any-key
 ```
 
-### Post-Upgrade Checklist
+Use the same working directory and port from your previous setup. The session key can be anything — your database and projects remain untouched.
+
+### Step 4: Start
+
+```bash
+vps-deployer start
+```
+
+### Verify
 
 1. Check the service is running: `systemctl --user status vps-deployer`
 2. Verify the web UI loads
-3. Check logs for errors: `journalctl --user -u vps-deployer -f`
-4. Test a manual deployment
+3. Test a manual deployment
 
 ### Breaking Changes
 
-Check the [GitHub releases page](https://github.com/0xv1shal/vps-deployer/releases) for breaking changes before upgrading. Major version bumps may require:
-
-- Database migrations (handled automatically)
-- Config file updates
-- Re-running `vps-deployer config`
+Check the [GitHub releases page](https://github.com/0xv1shal/vps-deployer/releases) for breaking changes before upgrading. Major version bumps may require database migrations (handled automatically).
 
 ### Rollback
 

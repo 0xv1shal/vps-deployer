@@ -1,73 +1,40 @@
 extends ../../dashboard/views/layout.pug
-
 block content
-  // Page Header
   .d-flex.justify-content-between.align-items-center.mb-4
     div
-      h2.mb-1 Settings
-      p.text-muted.mb-0 Manage your account and email configuration
+      h2.mb-1 Email Settings
+      p.text-muted.mb-0 Configure SMTP for deployment notifications
     div
-      i.bi.bi-gear.text-muted(style="font-size: 1.5rem;")
-
-  // Flash Messages
+      i.bi.bi-envelope-gear.text-muted(style="font-size: 1.5rem;")
+    div
+      a.btn.btn-outline-secondary.btn-sm(href="/settings")
+        i.bi.bi-arrow-left.me-1
+        | Back to Settings
   if error
     .alert.alert-danger.alert-dismissible.fade-show.d-flex.align-items-center.mb-4(role="alert")
       i.bi.bi-exclamation-triangle-fill.me-2
       span.flex-grow-1 #{error}
-      
-
   if success
     .alert.alert-success.alert-dismissible.fade-show.d-flex.align-items-center.mb-4(role="alert")
       i.bi.bi-check-circle-fill.me-2
       span.flex-grow-1 #{success}
-      
-
-  .row
-    .col-lg-6.mb-4
-      // ================= USER INFO =================
-      .card.border-0.shadow-sm.h-100
-        .card-header.bg-white.border-bottom-0.pt-3
-          .d-flex.align-items-center
-            i.bi.bi-person-circle.text-primary.me-2(style="font-size: 1.25rem;")
-            h5.mb-0 User Details
-        .card-body
-          .mb-3.pb-2.border-bottom
-            .d-flex.justify-content-between
-              small.text-muted Username
-              strong.text-dark #{user.username}
-          .mb-3.pb-2.border-bottom
-            .d-flex.justify-content-between
-              small.text-muted Email
-              strong.text-dark #{user.email}
-          .mb-3.pb-2.border-bottom
-            .d-flex.justify-content-between
-              small.text-muted Created At
-              strong.text-dark #{convertDateToIST(user.created_at)}
-          .mb-3
-            .d-flex.justify-content-between
-              small.text-muted Last Logged In
-              strong.text-dark #{convertDateToIST(user.last_logged_in)}
-
-    .col-lg-6.mb-4
-      // ================= QUICK ACTIONS =================
-      .card.border-0.shadow-sm.h-100
+  .row.mb-4
+    .col-lg-12
+      .card.border-0.shadow-sm
         .card-header.bg-white.border-bottom-0.pt-3
           .d-flex.align-items-center
             i.bi.bi-envelope-paper.text-primary.me-2(style="font-size: 1.25rem;")
             h5.mb-0 Email Actions
-        .card-body.d-flex.align-items-center.justify-content-center.flex-column
-          form(method="POST", action="/settings/email/test", style="width: 100%;")
-            button.btn.btn-outline-success.w-100(type="submit")
-              i.bi.bi-envelope-paper-fill.me-2
+        .card-body
+          form(method="POST", action="/settings/email/test")
+            button.btn.btn-outline-success(type="submit")
+              i.bi.bi-send.me-2
               | Send Test Email
-          small.text-muted.mt-3.d-block.text-center Verify your email configuration
-
-  // ================= EMAIL CONFIG =================
   .card.border-0.shadow-sm
     .card-header.bg-white.border-bottom-0.pt-3
       .d-flex.align-items-center
-        i.bi.bi-envelope-gear.text-primary.me-2(style="font-size: 1.25rem;")
-        h5.mb-0 Email Configuration
+        i.bi.bi-gear.text-primary.me-2(style="font-size: 1.25rem;")
+        h5.mb-0 SMTP Configuration
     .card-body
       form(method="POST", action="/settings/email")
         .row
@@ -138,8 +105,6 @@ block content
           button.btn.btn-primary(type="submit")
             i.bi.bi-save.me-2
             | Save Configuration
-
-  // Additional styles
   style.
     .card {
       transition: transform 0.2s ease, box-shadow 0.2s ease;

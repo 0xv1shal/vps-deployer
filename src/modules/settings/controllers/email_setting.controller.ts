@@ -3,16 +3,29 @@ import nodemailer from "nodemailer";
 import { getDB } from "../../../db/db.ts";
 import { convertDateToIST } from "../../../helpers/date.helper.ts";
 
-export const viewSettings = (_req: Request, res: Response) => {
+export const viewMainSettings = (_req: Request, res: Response) => {
   const db = getDB();
-
   const user = db.prepare("SELECT * FROM user LIMIT 1").get();
   const email = db.prepare("SELECT * FROM email LIMIT 1").get();
-
-  return res.render("settings/views/index", {
+  const paths = db.prepare("SELECT * FROM path_settings ORDER BY sequence ASC").all();
+  return res.render("settings/views/main", {
     user: user || {},
     email: email || {},
+    paths,
     convertDateToIST,
+    active: "settings",
+    error: null,
+    success: null,
+  });
+};
+
+export const viewEmailSettings = (_req: Request, res: Response) => {
+  const db = getDB();
+
+  const email = db.prepare("SELECT * FROM email LIMIT 1").get();
+
+  return res.render("settings/views/email", {
+    email: email || {},
     active: "settings",
     error: null,
     success: null,
@@ -25,14 +38,12 @@ export const upsertEmail = (req: Request, res: Response) => {
 
   if (!smtp || !smtp_port || !from) {
     const db = getDB();
-    const user = db.prepare("SELECT * FROM user LIMIT 1").get();
     const emailData = db.prepare("SELECT * FROM email LIMIT 1").get();
-    return res.render("settings/views/index", {
-      user: user || {},
+    return res.render("settings/views/email", {
       email: emailData || {},
-      convertDateToIST,
       active: "settings",
       error: "SMTP host, port, and from email are required",
+      success: null,
     });
   }
   const db = getDB();
@@ -56,26 +67,22 @@ export const upsertEmail = (req: Request, res: Response) => {
       ).run(username, password, smtp, smtp_port, from);
     }
 
-    const user = db.prepare("SELECT * FROM user LIMIT 1").get();
     const emailData = db.prepare("SELECT * FROM email LIMIT 1").get();
 
-    return res.render("settings/views/index", {
-      user: user || {},
+    return res.render("settings/views/email", {
       email: emailData || {},
-      convertDateToIST,
       active: "settings",
+      error:null,
       success: "Email settings saved successfully",
     });
   } catch (error: any) {
-    const user = db.prepare("SELECT * FROM user LIMIT 1").get();
     const emailData = db.prepare("SELECT * FROM email LIMIT 1").get();
 
-    return res.render("settings/views/index", {
-      user: user || {},
+    return res.render("settings/views/email", {
       email: emailData || {},
-      convertDateToIST,
       active: "settings",
       error: error.message || "Failed to save email settings",
+      success:null
     });
   }
 };
@@ -88,12 +95,11 @@ export const sendTestEmail = async (_req: Request, res: Response) => {
   const user: any = db.prepare("SELECT * FROM user LIMIT 1").get();
 
   if (!emailConfig || !user) {
-    return res.render("settings/views/index", {
-      user: user || {},
+     return res.render("settings/views/email", {
       email: emailConfig || {},
-      convertDateToIST,
       active: "settings",
       error: "Email settings not configured",
+      success: null,
     });
   }
 
@@ -203,20 +209,18 @@ export const sendTestEmail = async (_req: Request, res: Response) => {
 </html>`,
     });
 
-    return res.render("settings/views/index", {
-      user: user || {},
+     return res.render("settings/views/email", {
       email: emailConfig || {},
-      convertDateToIST,
       active: "settings",
+      error: null,
       success: "Test email sent successfully",
     });
   } catch (err: any) {
-    return res.render("settings/views/index", {
-      user: user || {},
+    return res.render("settings/views/email", {
       email: emailConfig || {},
-      convertDateToIST,
       active: "settings",
       error: err.message || "Failed to send test email",
+      success: null,
     });
   }
 };

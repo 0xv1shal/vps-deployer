@@ -55,11 +55,12 @@ export default defineConfig({
     ],
   },
   {
-    label: 'Email',
+    label: 'Settings',
     collapsed: true,
     items: [
-      { slug: 'email/smtp-setup' },
-      { slug: 'email/providers' },
+      { slug: 'settings/overview' },
+      { slug: 'settings/email-settings' },
+      { slug: 'settings/path-settings' },
     ],
   },
   {

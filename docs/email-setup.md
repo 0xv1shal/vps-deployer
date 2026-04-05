@@ -12,7 +12,7 @@ VPS Deployer can send email notifications when deployments succeed or fail. This
 
 ### Step 1: Navigate to Settings
 
-From the dashboard, click **Settings** in the sidebar.
+From the dashboard, click **Settings → Email Settings** in the sidebar.
 
 ### Step 2: Enter SMTP Credentials
 
